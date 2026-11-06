@@ -1,0 +1,202 @@
+<!-- Notificaciones Globales Toast -->
+<app-toast-contenedor></app-toast-contenedor>
+
+@if (auth.autenticado()) {
+  <div class="app-layout">
+    <!-- Barra Superior de Navegación Institucional -->
+    <header class="app-topbar">
+      <div class="topbar-inner">
+        <!-- Marca y Logo La Dorada -->
+        <div class="topbar-brand">
+          <button
+            type="button"
+            class="btn-hamburguesa mobile-only"
+            (click)="toggleMenuMovil()"
+            aria-label="Abrir menú de navegación"
+          >
+            <span class="material-icons">{{ menuMovilAbierto() ? 'close' : 'menu' }}</span>
+          </button>
+
+          <a routerLink="/catalogo" class="brand-link" (click)="cerrarMenuMovil()">
+            <div class="brand-logo-icon">
+              <span class="material-icons">warehouse</span>
+            </div>
+            <div class="brand-textos">
+              <span class="brand-empresa">La Dorada S.A.S.</span>
+              <span class="brand-modulo">Gestión de Pedidos</span>
+            </div>
+          </a>
+        </div>
+
+        <!-- Menú Principal Filtrado por Rol (§6) - Desktop -->
+        <nav class="topbar-nav desktop-only" aria-label="Navegación principal">
+          <!-- 1. Catálogo (Todos: admin, vendedor, bodega) -->
+          <a
+            routerLink="/catalogo"
+            routerLinkActive="nav-activo"
+            [routerLinkActiveOptions]="{ exact: false }"
+            class="nav-link"
+          >
+            <span class="material-icons nav-icon">storefront</span>
+            <span>Catálogo</span>
+          </a>
+
+          <!-- 2. Pedidos (Todos: admin, vendedor, bodega) -->
+          <a
+            routerLink="/pedidos"
+            routerLinkActive="nav-activo"
+            [routerLinkActiveOptions]="{ exact: false }"
+            class="nav-link"
+          >
+            <span class="material-icons nav-icon">receipt_long</span>
+            <span>Pedidos</span>
+          </a>
+
+          <!-- 3. Bodega (Solo admin y bodega; vendedor NO lo ve) -->
+          @if (auth.esAdmin() || auth.esBodega()) {
+            <a
+              routerLink="/bodega"
+              routerLinkActive="nav-activo"
+              class="nav-link"
+            >
+              <span class="material-icons nav-icon">inventory_2</span>
+              <span>Bodega</span>
+            </a>
+          }
+
+          <!-- 4. Resumen (Todos: admin, vendedor, bodega) -->
+          <a
+            routerLink="/resumen"
+            routerLinkActive="nav-activo"
+            class="nav-link"
+          >
+            <span class="material-icons nav-icon">analytics</span>
+            <span>Resumen</span>
+          </a>
+
+          <!-- 5. Actividad (Solo admin; vendedor y bodega NO lo ven) -->
+          @if (auth.esAdmin()) {
+            <a
+              routerLink="/actividad"
+              routerLinkActive="nav-activo"
+              class="nav-link nav-admin-link"
+            >
+              <span class="material-icons nav-icon">shield</span>
+              <span>Auditoría</span>
+            </a>
+          }
+        </nav>
+
+        <!-- Bloque Usuario y Perfil -->
+        <div class="topbar-usuario">
+          <div class="perfil-info">
+            <span class="usuario-nombre">{{ auth.nombreUsuario() }}</span>
+            <span class="usuario-rol-tag" [class]="'rol-' + auth.rol()">
+              {{ auth.rol() }}
+            </span>
+          </div>
+
+          <button
+            type="button"
+            class="btn-salir"
+            (click)="salir()"
+            title="Cerrar sesión"
+            aria-label="Cerrar sesión"
+          >
+            <span class="material-icons">logout</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Menú Desplegable Móvil -->
+      @if (menuMovilAbierto()) {
+        <div class="mobile-drawer mobile-only">
+          <nav class="mobile-nav">
+            <a
+              routerLink="/catalogo"
+              routerLinkActive="nav-activo-mobile"
+              class="mobile-nav-link"
+              (click)="cerrarMenuMovil()"
+            >
+              <span class="material-icons">storefront</span>
+              Catálogo de Productos
+            </a>
+
+            <a
+              routerLink="/pedidos"
+              routerLinkActive="nav-activo-mobile"
+              class="mobile-nav-link"
+              (click)="cerrarMenuMovil()"
+            >
+              <span class="material-icons">receipt_long</span>
+              Listado de Pedidos
+            </a>
+
+            @if (auth.puedeCrearPedido()) {
+              <a
+                routerLink="/pedidos/nuevo"
+                routerLinkActive="nav-activo-mobile"
+                class="mobile-nav-link nav-destacado"
+                (click)="cerrarMenuMovil()"
+              >
+                <span class="material-icons">add_shopping_cart</span>
+                Nuevo Pedido WhatsApp
+              </a>
+            }
+
+            @if (auth.esAdmin() || auth.esBodega()) {
+              <a
+                routerLink="/bodega"
+                routerLinkActive="nav-activo-mobile"
+                class="mobile-nav-link"
+                (click)="cerrarMenuMovil()"
+              >
+                <span class="material-icons">inventory_2</span>
+                Módulo Bodega & Despacho
+              </a>
+            }
+
+            <a
+              routerLink="/resumen"
+              routerLinkActive="nav-activo-mobile"
+              class="mobile-nav-link"
+              (click)="cerrarMenuMovil()"
+            >
+              <span class="material-icons">analytics</span>
+              Resumen Financiero
+            </a>
+
+            @if (auth.esAdmin()) {
+              <a
+                routerLink="/actividad"
+                routerLinkActive="nav-activo-mobile"
+                class="mobile-nav-link"
+                (click)="cerrarMenuMovil()"
+              >
+                <span class="material-icons">shield</span>
+                Trazabilidad / Auditoría
+              </a>
+            }
+
+            <div class="mobile-nav-footer">
+              <button type="button" class="btn-salir-mobile" (click)="salir()">
+                <span class="material-icons">logout</span>
+                Cerrar sesión ({{ auth.nombreUsuario() }})
+              </button>
+            </div>
+          </nav>
+        </div>
+      }
+    </header>
+
+    <!-- Contenido Principal Dinámico -->
+    <main class="app-main">
+      <router-outlet></router-outlet>
+    </main>
+  </div>
+} @else {
+  <!-- Si no está autenticado, renderiza pantalla completa (Login) -->
+  <main class="app-main-public">
+    <router-outlet></router-outlet>
+  </main>
+}

@@ -1,0 +1,6 @@
+{
+  "name": "Distribuidora La Dorada — Pedidos e Inventario",
+  "description": "Sistema integral de gestión de pedidos e inventario para Distribuidora La Dorada S.A.S. con control de acceso por roles y Supabase.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
