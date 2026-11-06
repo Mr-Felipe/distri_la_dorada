@@ -22,12 +22,12 @@ export const routes: Routes = [
       },
       {
         path: 'nuevo',
-        canActivate: [rolGuard(['admin', 'vendedor', 'bodega'])],
+        canActivate: [rolGuard(['admin'])],
         loadComponent: () => import('./features/catalogo/producto-form.component').then(m => m.ProductoFormComponent)
       },
       {
         path: ':id',
-        canActivate: [rolGuard(['admin', 'vendedor', 'bodega'])],
+        canActivate: [rolGuard(['admin'])],
         loadComponent: () => import('./features/catalogo/producto-form.component').then(m => m.ProductoFormComponent)
       }
     ]

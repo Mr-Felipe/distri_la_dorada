@@ -63,7 +63,7 @@ export function obtenerInfoEstado(estado: EstadoPedido): InfoEstado {
 
 /** Permisos del sistema según la matriz de especificación §6 */
 export function puedeCrearEditarProducto(rol: RolUsuario | null | undefined): boolean {
-  return rol === 'admin' || rol === 'vendedor';
+  return rol === 'admin';
 }
 
 export function puedeAjustarExistencias(rol: RolUsuario | null | undefined): boolean {
