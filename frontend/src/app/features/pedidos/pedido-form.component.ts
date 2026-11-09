@@ -169,8 +169,12 @@ interface LineaFormItem {
                           step="1"
                           formControlName="cantidad"
                           class="input-cantidad text-center font-mono"
+                          [class.cantidad-invalida]="lineasItems.at(i).get('cantidad')?.invalid && lineasItems.at(i).get('cantidad')?.dirty"
                           (input)="alCambiarCantidad()"
                         />
+                        @if (lineasItems.at(i).get('cantidad')?.invalid && lineasItems.at(i).get('cantidad')?.dirty) {
+                          <span class="error-msg">La cantidad debe ser al menos 1</span>
+                        }
                       </td>
 
                       <!-- Subtotal línea -->
@@ -490,6 +494,17 @@ interface LineaFormItem {
     }
     .input-cantidad:focus {
       border-color: #0f2744;
+    }
+
+    .input-cantidad.cantidad-invalida {
+      border-color: #dc2626;
+      background-color: #fef2f2;
+    }
+
+    td .error-msg {
+      display: block;
+      margin-top: 0.25rem;
+      white-space: nowrap;
     }
 
     .subtotal-celda {

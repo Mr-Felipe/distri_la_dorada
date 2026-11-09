@@ -43,7 +43,7 @@ import { Modal } from '../../shared/modal/modal';
         <input
           type="text"
           [formControl]="controlBusqueda"
-          placeholder="Buscar por nombre o referencia (ej. ARROZ-01)..."
+          placeholder="Buscar por nombre o referencia (ej. JAB-001)..."
           class="buscador-input"
         />
         @if (terminoBusqueda()) {
