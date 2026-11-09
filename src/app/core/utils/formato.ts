@@ -29,7 +29,8 @@ export function formatearFecha(fechaIso: string | null | undefined, incluirHora 
   }
 }
 
-export function formatearNumeroPedido(numero: number | null | undefined): string {
-  if (numero === null || numero === undefined) return '#—';
-  return `#${numero}`;
+export function formatearNumeroPedido(numero: string | number | null | undefined): string {
+  if (numero === null || numero === undefined || numero === '') return '#—';
+  const s = String(numero);
+  return /^\d+$/.test(s) ? `#${s}` : s;
 }

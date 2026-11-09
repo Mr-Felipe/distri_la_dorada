@@ -1,6 +1,5 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
-import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
-import { AuthService } from './core/services/auth.service';
+import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
+import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { ToastContenedor } from './shared/toast/toast';
 
 @Component({
@@ -11,9 +10,6 @@ import { ToastContenedor } from './shared/toast/toast';
   styleUrl: './app.css',
 })
 export class App {
-  readonly auth = inject(AuthService);
-  private readonly router = inject(Router);
-
   readonly menuMovilAbierto = signal<boolean>(false);
 
   toggleMenuMovil(): void {
@@ -22,10 +18,5 @@ export class App {
 
   cerrarMenuMovil(): void {
     this.menuMovilAbierto.set(false);
-  }
-
-  async salir(): Promise<void> {
-    this.cerrarMenuMovil();
-    await this.auth.logout();
   }
 }

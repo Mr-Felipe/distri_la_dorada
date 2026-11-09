@@ -2,7 +2,6 @@ import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } 
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { ProductoService } from '../../core/services/producto.service';
-import { AuthService } from '../../core/services/auth.service';
 import { ToastService } from '../../core/services/toast.service';
 import { Producto } from '../../core/models/producto';
 import { formatearCOP } from '../../core/utils/formato';
@@ -30,12 +29,10 @@ import { Modal } from '../../shared/modal/modal';
       </div>
 
       <div class="modulo-acciones">
-        @if (auth.puedeCrearEditarProducto()) {
-          <a routerLink="/catalogo/nuevo" class="btn-nuevo">
-            <span class="material-icons">add_box</span>
-            Nuevo Producto
-          </a>
-        }
+        <a routerLink="/catalogo/nuevo" class="btn-nuevo">
+          <span class="material-icons">add_box</span>
+          Nuevo Producto
+        </a>
       </div>
     </div>
 
@@ -122,39 +119,33 @@ import { Modal } from '../../shared/modal/modal';
               </td>
               <td class="text-right">
                 <div class="acciones-fila">
-                  @if (auth.puedeAjustarExistencias()) {
-                    <button
-                      type="button"
-                      class="btn-accion-icono btn-ajustar"
-                      (click)="abrirModalStock(prod)"
-                      title="Ajustar existencias físicas"
-                    >
-                      <span class="material-icons">swap_vert</span>
-                    </button>
-                  }
+                  <button
+                    type="button"
+                    class="btn-accion-icono btn-ajustar"
+                    (click)="abrirModalStock(prod)"
+                    title="Ajustar existencias físicas"
+                  >
+                    <span class="material-icons">swap_vert</span>
+                  </button>
 
-                  @if (auth.puedeCrearEditarProducto()) {
-                    <a
-                      [routerLink]="['/catalogo', prod.id]"
-                      class="btn-accion-icono"
-                      title="Editar información del producto"
-                    >
-                      <span class="material-icons">edit</span>
-                    </a>
-                  }
+                  <a
+                    [routerLink]="['/catalogo', prod.id]"
+                    class="btn-accion-icono"
+                    title="Editar información del producto"
+                  >
+                    <span class="material-icons">edit</span>
+                  </a>
 
-                  @if (auth.puedeDesactivarProducto()) {
-                    <button
-                      type="button"
-                      class="btn-accion-icono"
-                      [class.btn-activar]="!prod.activo"
-                      [class.btn-desactivar]="prod.activo"
-                      (click)="confirmarAlternarActivo(prod)"
-                      [title]="prod.activo ? 'Desactivar producto' : 'Activar producto'"
-                    >
-                      <span class="material-icons">{{ prod.activo ? 'toggle_on' : 'toggle_off' }}</span>
-                    </button>
-                  }
+                  <button
+                    type="button"
+                    class="btn-accion-icono"
+                    [class.btn-activar]="!prod.activo"
+                    [class.btn-desactivar]="prod.activo"
+                    (click)="confirmarAlternarActivo(prod)"
+                    [title]="prod.activo ? 'Desactivar producto' : 'Activar producto'"
+                  >
+                    <span class="material-icons">{{ prod.activo ? 'toggle_on' : 'toggle_off' }}</span>
+                  </button>
                 </div>
               </td>
             </tr>
@@ -191,26 +182,22 @@ import { Modal } from '../../shared/modal/modal';
             </div>
 
             <div class="tarjeta-acciones">
-              @if (auth.puedeAjustarExistencias()) {
-                <button
-                  type="button"
-                  class="btn-movil-accion"
-                  (click)="abrirModalStock(prod)"
-                >
-                  <span class="material-icons">swap_vert</span>
-                  Ajustar Stock
-                </button>
-              }
+              <button
+                type="button"
+                class="btn-movil-accion"
+                (click)="abrirModalStock(prod)"
+              >
+                <span class="material-icons">swap_vert</span>
+                Ajustar Stock
+              </button>
 
-              @if (auth.puedeCrearEditarProducto()) {
-                <a
-                  [routerLink]="['/catalogo', prod.id]"
-                  class="btn-movil-accion btn-movil-edit"
-                >
-                  <span class="material-icons">edit</span>
-                  Editar
-                </a>
-              }
+              <a
+                [routerLink]="['/catalogo', prod.id]"
+                class="btn-movil-accion btn-movil-edit"
+              >
+                <span class="material-icons">edit</span>
+                Editar
+              </a>
             </div>
           </div>
         }
@@ -720,7 +707,6 @@ import { Modal } from '../../shared/modal/modal';
 })
 export class CatalogoListaComponent implements OnInit {
   private readonly productoService = inject(ProductoService);
-  readonly auth = inject(AuthService);
   private readonly toast = inject(ToastService);
 
   readonly productos = signal<Producto[]>([]);

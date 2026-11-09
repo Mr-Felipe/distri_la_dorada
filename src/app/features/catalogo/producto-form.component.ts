@@ -2,7 +2,6 @@ import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@ang
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { ProductoService } from '../../core/services/producto.service';
-import { AuthService } from '../../core/services/auth.service';
 import { ToastService } from '../../core/services/toast.service';
 import { BotonCargando } from '../../shared/boton-cargando/boton-cargando';
 import { formatearCOP } from '../../core/utils/formato';
@@ -108,13 +107,10 @@ import { mapError } from '../../core/utils/errores';
               }
             </div>
 
-            <!-- Existencias (solo editable por admin y bodega según §6) -->
+            <!-- Existencias -->
             <div class="campo-grupo">
               <label for="existencias" class="campo-label">
                 Existencias iniciales (Stock)
-                @if (!auth.puedeAjustarExistencias()) {
-                  <span class="badge-bloqueado" title="Solo Admin o Bodega pueden cambiar existencias">(Solo Bodega/Admin)</span>
-                }
               </label>
               <input
                 id="existencias"
@@ -124,19 +120,17 @@ import { mapError } from '../../core/utils/errores';
                 formControlName="existencias"
                 placeholder="0"
                 class="campo-control font-mono"
-                [class.campo-deshabilitado]="!auth.puedeAjustarExistencias()"
                 [class.campo-invalido]="campoInvalido('existencias')"
               />
               <span class="campo-ayuda">Unidades físicas en bodega</span>
             </div>
 
-            <!-- Activo para venta (solo editable por admin) -->
+            <!-- Activo para venta -->
             <div class="campo-grupo span-2 mt-2">
-              <label class="checkbox-label" [class.opacity-60]="!auth.esAdmin()">
+              <label class="checkbox-label">
                 <input
                   type="checkbox"
                   formControlName="activo"
-                  [disabled]="!auth.esAdmin()"
                 />
                 <span class="checkbox-text">
                   <strong>Producto activo para venta</strong>
@@ -400,7 +394,6 @@ import { mapError } from '../../core/utils/errores';
 })
 export class ProductoFormComponent implements OnInit {
   private readonly productoService = inject(ProductoService);
-  readonly auth = inject(AuthService);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly toast = inject(ToastService);
@@ -439,11 +432,6 @@ export class ProductoFormComponent implements OnInit {
       this.esModoEdicion.set(true);
       this.productoId.set(id);
       this.cargarProducto(id);
-    }
-
-    // Si el usuario no tiene permiso de ajustar existencias, deshabilitar el control
-    if (!this.auth.puedeAjustarExistencias()) {
-      this.formulario.controls.existencias.disable();
     }
   }
 
@@ -489,8 +477,8 @@ export class ProductoFormComponent implements OnInit {
           referencia: raw.referencia,
           nombre: raw.nombre,
           precio: raw.precio,
-          ...(this.auth.puedeAjustarExistencias() ? { existencias: raw.existencias } : {}),
-          ...(this.auth.esAdmin() ? { activo: raw.activo } : {})
+          existencias: raw.existencias,
+          activo: raw.activo
         });
         this.toast.exito(`Producto «${raw.referencia}» actualizado`);
       } else {
@@ -498,7 +486,7 @@ export class ProductoFormComponent implements OnInit {
           referencia: raw.referencia,
           nombre: raw.nombre,
           precio: raw.precio,
-          existencias: this.auth.puedeAjustarExistencias() ? raw.existencias : 0,
+          existencias: raw.existencias,
           activo: raw.activo
         });
         this.toast.exito(`Producto «${raw.referencia}» registrado exitosamente`);

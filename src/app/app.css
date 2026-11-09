@@ -114,77 +114,6 @@
   font-weight: 700;
 }
 
-.nav-admin-link {
-  border: 1px dashed rgba(212, 175, 55, 0.4);
-}
-
-/* Usuario / Perfil */
-.topbar-usuario {
-  display: flex;
-  align-items: center;
-  gap: 0.875rem;
-}
-
-.perfil-info {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 0.15rem;
-}
-
-.usuario-nombre {
-  font-size: 0.8125rem;
-  font-weight: 700;
-  color: #ffffff;
-}
-
-.usuario-rol-tag {
-  font-size: 0.6875rem;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  padding: 0.1rem 0.4rem;
-  border-radius: 0.25rem;
-}
-
-.rol-admin {
-  background-color: #fee2e2;
-  color: #991b1b;
-}
-
-.rol-vendedor {
-  background-color: #fef3c7;
-  color: #92400e;
-}
-
-.rol-bodega {
-  background-color: #e0f2fe;
-  color: #075985;
-}
-
-.btn-salir {
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  color: #cbd5e1;
-  padding: 0.45rem;
-  border-radius: 0.5rem;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.15s ease;
-}
-
-.btn-salir:hover {
-  background: #dc2626;
-  border-color: #dc2626;
-  color: #ffffff;
-}
-
-.btn-salir .material-icons {
-  font-size: 1.25rem;
-}
-
 /* Botón Hamburguesa */
 .btn-hamburguesa {
   background: transparent;
@@ -238,28 +167,6 @@
   font-weight: 700;
 }
 
-.mobile-nav-footer {
-  margin-top: 1rem;
-  padding-top: 1rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.btn-salir-mobile {
-  width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  background: rgba(220, 38, 38, 0.2);
-  border: 1px solid rgba(220, 38, 38, 0.4);
-  color: #fca5a5;
-  padding: 0.65rem;
-  border-radius: 0.5rem;
-  font-size: 0.875rem;
-  font-weight: 700;
-  cursor: pointer;
-}
-
 /* Área de contenido */
 .app-main {
   flex: 1;
@@ -268,10 +175,6 @@
   margin: 0 auto;
   box-sizing: border-box;
   padding: 2rem 1.25rem;
-}
-
-.app-main-public {
-  min-height: 100vh;
 }
 
 /* Control responsivo */

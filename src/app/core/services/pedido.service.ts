@@ -26,12 +26,8 @@ export class PedidoService {
 
     if (filtros?.busqueda && filtros.busqueda.trim().length > 0) {
       const termino = filtros.busqueda.trim();
-      const num = parseInt(termino.replace('#', ''), 10);
-      if (!isNaN(num)) {
-        query = query.or(`cliente.ilike.%${termino}%,numero.eq.${num}`);
-      } else {
-        query = query.ilike('cliente', `%${termino}%`);
-      }
+      const limpio = termino.replace(/^#/, '').trim();
+      query = query.or(`cliente.ilike.%${termino}%,numero.ilike.%${limpio}%`);
     }
 
     const { data, error } = await query;
@@ -42,7 +38,7 @@ export class PedidoService {
 
     return (data || []).map(p => ({
       ...p,
-      numero: Number(p.numero),
+      numero: p.numero,
       total: Number(p.total)
     }));
   }
@@ -69,7 +65,6 @@ export class PedidoService {
         producto_id,
         cantidad,
         precio_unitario,
-        creado_en,
         producto:productos (
           id,
           referencia,
@@ -91,7 +86,6 @@ export class PedidoService {
       producto_id: string;
       cantidad: number;
       precio_unitario: number;
-      creado_en?: string;
       producto?: {
         id: string;
         referencia: string;
@@ -108,7 +102,6 @@ export class PedidoService {
       producto_id: it.producto_id,
       cantidad: Number(it.cantidad),
       precio_unitario: Number(it.precio_unitario),
-      creado_en: it.creado_en,
       producto: it.producto ? {
         ...it.producto,
         precio: Number(it.producto.precio),
@@ -118,7 +111,7 @@ export class PedidoService {
 
     return {
       ...pedido,
-      numero: Number(pedido.numero),
+      numero: pedido.numero,
       total: Number(pedido.total),
       items: itemsMapeados
     };

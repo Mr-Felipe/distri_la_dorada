@@ -2,7 +2,6 @@ import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } 
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { PedidoService } from '../../core/services/pedido.service';
-import { AuthService } from '../../core/services/auth.service';
 import { EstadoPedido } from '../../core/models/enums';
 import { Pedido } from '../../core/models/pedido';
 import { formatearCOP, formatearFecha, formatearNumeroPedido } from '../../core/utils/formato';
@@ -25,12 +24,10 @@ type FiltroEstadoTipo = 'todos' | EstadoPedido;
       </div>
 
       <div class="modulo-acciones">
-        @if (auth.puedeCrearPedido()) {
-          <a routerLink="/pedidos/nuevo" class="btn-nuevo-pedido">
-            <span class="material-icons">add_shopping_cart</span>
-            Nuevo Pedido
-          </a>
-        }
+        <a routerLink="/pedidos/nuevo" class="btn-nuevo-pedido">
+          <span class="material-icons">add_shopping_cart</span>
+          Nuevo Pedido
+        </a>
       </div>
     </div>
 
@@ -42,7 +39,7 @@ type FiltroEstadoTipo = 'todos' | EstadoPedido;
         <input
           type="text"
           [formControl]="controlBusqueda"
-          placeholder="Buscar por cliente o número (#1000)..."
+          placeholder="Buscar por cliente o número (ej. PED-2026-0005)..."
           class="buscador-input"
         />
         @if (controlBusqueda.value) {
@@ -450,7 +447,6 @@ type FiltroEstadoTipo = 'todos' | EstadoPedido;
 })
 export class PedidosListaComponent implements OnInit {
   private readonly pedidoService = inject(PedidoService);
-  readonly auth = inject(AuthService);
 
   readonly pedidos = signal<Pedido[]>([]);
   readonly cargando = signal<boolean>(true);
@@ -506,7 +502,7 @@ export class PedidosListaComponent implements OnInit {
     this.estadoSeleccionado.set(estado);
   }
 
-  formatearNumero(num: number): string {
+  formatearNumero(num: string | number): string {
     return formatearNumeroPedido(num);
   }
 

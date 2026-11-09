@@ -2,7 +2,6 @@ import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@ang
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
 import { PedidoService } from '../../core/services/pedido.service';
-import { AuthService } from '../../core/services/auth.service';
 import { ToastService } from '../../core/services/toast.service';
 import { Pedido } from '../../core/models/pedido';
 import { formatearCOP, formatearFecha, formatearNumeroPedido } from '../../core/utils/formato';
@@ -49,10 +48,10 @@ import { Modal } from '../../shared/modal/modal';
               </div>
             </div>
 
-            <!-- Botones de Acción según Matriz de Permisos (§6 / CU-04 / CU-08) -->
+            <!-- Botones de Acción según el estado del pedido (CU-04 / CU-08) -->
             <div class="acciones-cabecera">
-              <!-- Acción CONFIRMAR (Solo Pendiente + Admin/Vendedor) -->
-              @if (ped.estado === 'pendiente' && auth.puedeConfirmarCancelarPedido()) {
+              <!-- Acción CONFIRMAR (solo estado pendiente) -->
+              @if (ped.estado === 'pendiente') {
                 <app-boton-cargando
                   [variante]="'dorado'"
                   [tamano]="'md'"
@@ -65,8 +64,8 @@ import { Modal } from '../../shared/modal/modal';
                 </app-boton-cargando>
               }
 
-              <!-- Acción DESPACHAR (Solo Confirmado + Admin/Bodega) -->
-              @if (ped.estado === 'confirmado' && auth.puedeDespacharPedido()) {
+              <!-- Acción DESPACHAR (solo estado confirmado) -->
+              @if (ped.estado === 'confirmado') {
                 <app-boton-cargando
                   [variante]="'exito'"
                   [tamano]="'md'"
@@ -79,8 +78,8 @@ import { Modal } from '../../shared/modal/modal';
                 </app-boton-cargando>
               }
 
-              <!-- Acción CANCELAR (Pendiente o Confirmado + Admin/Vendedor) -->
-              @if ((ped.estado === 'pendiente' || ped.estado === 'confirmado') && auth.puedeConfirmarCancelarPedido()) {
+              <!-- Acción CANCELAR (pendiente o confirmado) -->
+              @if (ped.estado === 'pendiente' || ped.estado === 'confirmado') {
                 <app-boton-cargando
                   [variante]="'peligro'"
                   [tamano]="'md'"
@@ -642,7 +641,6 @@ import { Modal } from '../../shared/modal/modal';
 })
 export class PedidoDetalleComponent implements OnInit {
   private readonly pedidoService = inject(PedidoService);
-  readonly auth = inject(AuthService);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly toast = inject(ToastService);
@@ -682,7 +680,7 @@ export class PedidoDetalleComponent implements OnInit {
     }
   }
 
-  formatearNumero(num: number): string {
+  formatearNumero(num: string | number): string {
     return formatearNumeroPedido(num);
   }
 

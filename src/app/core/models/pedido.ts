@@ -13,12 +13,11 @@ export interface PedidoItem {
 
 export interface Pedido {
   id: string;
-  numero: number;
+  numero: string;
   cliente: string;
   observacion?: string | null;
   estado: EstadoPedido;
   total: number;
-  vendedor_id: string;
   motivo_rechazo?: string | null;
   creado_en: string;
   confirmado_en?: string | null;

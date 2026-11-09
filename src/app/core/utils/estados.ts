@@ -1,4 +1,4 @@
-import { EstadoPedido, RolUsuario } from '../models/enums';
+import { EstadoPedido } from '../models/enums';
 
 export interface InfoEstado {
   codigo: EstadoPedido;
@@ -59,33 +59,4 @@ export function obtenerInfoEstado(estado: EstadoPedido): InfoEstado {
     icono: 'help_outline',
     descripcion: ''
   };
-}
-
-/** Permisos del sistema según la matriz de especificación §6 */
-export function puedeCrearEditarProducto(rol: RolUsuario | null | undefined): boolean {
-  return rol === 'admin';
-}
-
-export function puedeAjustarExistencias(rol: RolUsuario | null | undefined): boolean {
-  return rol === 'admin' || rol === 'bodega';
-}
-
-export function puedeDesactivarProducto(rol: RolUsuario | null | undefined): boolean {
-  return rol === 'admin';
-}
-
-export function puedeCrearPedido(rol: RolUsuario | null | undefined): boolean {
-  return rol === 'admin' || rol === 'vendedor';
-}
-
-export function puedeConfirmarCancelarPedido(rol: RolUsuario | null | undefined): boolean {
-  return rol === 'admin' || rol === 'vendedor';
-}
-
-export function puedeDespacharPedido(rol: RolUsuario | null | undefined): boolean {
-  return rol === 'admin' || rol === 'bodega';
-}
-
-export function puedeVerActividad(rol: RolUsuario | null | undefined): boolean {
-  return rol === 'admin';
 }

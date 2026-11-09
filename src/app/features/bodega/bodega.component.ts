@@ -1,7 +1,6 @@
 import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { PedidoService } from '../../core/services/pedido.service';
-import { AuthService } from '../../core/services/auth.service';
 import { ToastService } from '../../core/services/toast.service';
 import { Pedido } from '../../core/models/pedido';
 import { formatearCOP, formatearFecha, formatearNumeroPedido } from '../../core/utils/formato';
@@ -89,7 +88,7 @@ import { Modal } from '../../shared/modal/modal';
                     {{ formatearFecha(ped.confirmado_en || ped.creado_en) }}
                   </span>
 
-                  @if (pestanaActiva() === 'confirmado' && auth.puedeDespacharPedido()) {
+                  @if (pestanaActiva() === 'confirmado') {
                     <app-boton-cargando
                       [variante]="'exito'"
                       [tamano]="'sm'"
@@ -507,7 +506,6 @@ import { Modal } from '../../shared/modal/modal';
 })
 export class BodegaComponent implements OnInit {
   private readonly pedidoService = inject(PedidoService);
-  readonly auth = inject(AuthService);
   private readonly toast = inject(ToastService);
 
   readonly pestanaActiva = signal<'confirmado' | 'pendiente'>('confirmado');
@@ -571,7 +569,7 @@ export class BodegaComponent implements OnInit {
     this.pestanaActiva.set(tab);
   }
 
-  formatearNumero(num: number): string {
+  formatearNumero(num: string | number): string {
     return formatearNumeroPedido(num);
   }
 

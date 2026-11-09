@@ -107,23 +107,6 @@ export function mapError(err: unknown): AppError {
     };
   }
 
-  // Auth errors
-  if (rawMsg.includes('Invalid login credentials') || rawMsg.includes('invalid_credentials')) {
-    return {
-      titulo: 'Acceso incorrecto',
-      mensaje: 'Correo electrónico o contraseña incorrectos.',
-      codigo: 'invalid_credentials'
-    };
-  }
-
-  if (anyErr.status === 401 || rawMsg.includes('JWT') || rawMsg.includes('token')) {
-    return {
-      titulo: 'Sesión expirada',
-      mensaje: 'Tu sesión ha caducado. Por favor inicia sesión nuevamente.',
-      codigo: '401'
-    };
-  }
-
   // Network / server errors
   if (rawMsg.includes('Failed to fetch') || rawMsg.includes('NetworkError') || anyErr.status === 500 || anyErr.status === 503) {
     return {
