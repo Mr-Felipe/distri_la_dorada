@@ -46,7 +46,7 @@ import { Modal } from '../../shared/modal/modal';
           placeholder="Buscar por nombre o referencia (ej. ARROZ-01)..."
           class="buscador-input"
         />
-        @if (controlBusqueda.value) {
+        @if (terminoBusqueda()) {
           <button type="button" class="btn-limpiar-busqueda" (click)="controlBusqueda.setValue('')">
             <span class="material-icons">close</span>
           </button>
@@ -72,7 +72,7 @@ import { Modal } from '../../shared/modal/modal';
       [totalElementos]="productosFiltrados().length"
       [mensajeCargando]="'Consultando catálogo de productos...'"
       [tituloVacio]="'No se encontraron productos'"
-      [mensajeVacio]="controlBusqueda.value ? 'No hay coincidencias para la búsqueda.' : 'No hay productos registrados en el sistema.'"
+      [mensajeVacio]="terminoBusqueda() ? 'No hay coincidencias para la búsqueda.' : 'No hay productos registrados en el sistema.'"
       [iconoVacio]="'inventory_2'"
       (reintentar)="cargarProductos()"
     >
@@ -714,6 +714,7 @@ export class CatalogoListaComponent implements OnInit {
   readonly errorCarga = signal<string | null>(null);
 
   readonly controlBusqueda = new FormControl<string>('', { nonNullable: true });
+  readonly terminoBusqueda = signal<string>('');
   readonly mostrarSoloActivos = signal<boolean>(false);
 
   // Modal ajuste existencias
@@ -725,7 +726,7 @@ export class CatalogoListaComponent implements OnInit {
   // Computado de productos filtrados localmente para mayor agilidad
   readonly productosFiltrados = computed(() => {
     const list = this.productos();
-    const query = this.controlBusqueda.value.toLowerCase().trim();
+    const query = this.terminoBusqueda().toLowerCase().trim();
     const soloActivos = this.mostrarSoloActivos();
 
     return list.filter(p => {
@@ -736,6 +737,7 @@ export class CatalogoListaComponent implements OnInit {
   });
 
   ngOnInit(): void {
+    this.controlBusqueda.valueChanges.subscribe(v => this.terminoBusqueda.set(v ?? ''));
     this.cargarProductos();
   }
 

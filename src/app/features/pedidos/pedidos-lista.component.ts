@@ -42,7 +42,7 @@ type FiltroEstadoTipo = 'todos' | EstadoPedido;
           placeholder="Buscar por cliente o número (ej. PED-2026-0005)..."
           class="buscador-input"
         />
-        @if (controlBusqueda.value) {
+        @if (terminoBusqueda()) {
           <button type="button" class="btn-limpiar" (click)="controlBusqueda.setValue('')">
             <span class="material-icons">close</span>
           </button>
@@ -72,7 +72,7 @@ type FiltroEstadoTipo = 'todos' | EstadoPedido;
       [totalElementos]="pedidosFiltrados().length"
       [mensajeCargando]="'Cargando pedidos de la distribuidora...'"
       [tituloVacio]="'No se encontraron pedidos'"
-      [mensajeVacio]="controlBusqueda.value ? 'Sin coincidencias para la búsqueda.' : 'No hay pedidos con el estado seleccionado.'"
+      [mensajeVacio]="terminoBusqueda() ? 'Sin coincidencias para la búsqueda.' : 'No hay pedidos con el estado seleccionado.'"
       [iconoVacio]="'receipt_long'"
       (reintentar)="cargarPedidos()"
     >
@@ -453,6 +453,7 @@ export class PedidosListaComponent implements OnInit {
   readonly errorCarga = signal<string | null>(null);
 
   readonly controlBusqueda = new FormControl<string>('', { nonNullable: true });
+  readonly terminoBusqueda = signal<string>('');
   readonly estadoSeleccionado = signal<FiltroEstadoTipo>('todos');
 
   readonly listaFiltros: { id: FiltroEstadoTipo; nombre: string }[] = [
@@ -466,7 +467,7 @@ export class PedidosListaComponent implements OnInit {
   readonly pedidosFiltrados = computed(() => {
     const list = this.pedidos();
     const filtro = this.estadoSeleccionado();
-    const query = this.controlBusqueda.value.toLowerCase().trim();
+    const query = this.terminoBusqueda().toLowerCase().trim();
 
     return list.filter(p => {
       if (filtro !== 'todos' && p.estado !== filtro) {
@@ -481,6 +482,7 @@ export class PedidosListaComponent implements OnInit {
   });
 
   ngOnInit(): void {
+    this.controlBusqueda.valueChanges.subscribe(v => this.terminoBusqueda.set(v ?? ''));
     this.cargarPedidos();
   }
 

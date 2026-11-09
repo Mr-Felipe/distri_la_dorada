@@ -27,7 +27,7 @@ interface LineaFormItem {
         </a>
         <div class="kicker">Creación de Pedido por WhatsApp</div>
         <h1 class="form-title">Nuevo Pedido Comercial</h1>
-        <p class="form-subtitle">Ingresa los datos del cliente y los productos solicitados. El pedido nace en estado <strong>Pendiente</strong>.</p>
+        <p class="form-subtitle">Ingresa los datos del cliente y los productos solicitados. Si el inventario alcanza, el pedido se <strong>confirma automáticamente</strong> y queda listo para despacho; si no, queda <strong>Pendiente</strong> con el motivo.</p>
       </div>
 
       @if (cargandoCatalogo()) {
@@ -795,9 +795,25 @@ export class PedidoFormComponent implements OnInit {
         observacion
       );
 
-      this.toast.exito('Pedido creado exitosamente en estado pendiente');
-      
       if (nuevoId) {
+        // Flujo To-Be: si no hay correcciones, el pedido queda confirmado
+        // automáticamente (validación + descuento único en el servidor) y
+        // bodega puede despacharlo sin esperar un paso económico manual.
+        try {
+          await this.pedidoService.confirmarPedido(nuevoId);
+          this.toast.exito('Pedido registrado y confirmado automáticamente — listo para despacho');
+        } catch (errConfirm: unknown) {
+          const appErr = mapError(errConfirm);
+          if (appErr.codigo === 'INVENTARIO_INSUFICIENTE') {
+            this.toast.advertencia(
+              `Pedido registrado en estado pendiente — inventario insuficiente: ${appErr.mensaje}`
+            );
+          } else {
+            this.toast.advertencia(
+              `Pedido registrado en estado pendiente — ${appErr.mensaje}`
+            );
+          }
+        }
         this.router.navigate(['/pedidos', nuevoId]);
       } else {
         this.router.navigate(['/pedidos']);
