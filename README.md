@@ -1,98 +1,51 @@
-# Distribuidora La Dorada S.A.S. — Sistema de Gestión de Pedidos e Inventario
+# Distribuidora La Dorada S.A.S. — Pedidos e Inventario
 
-Frontend en **Angular 21+ (Standalone, Signals, Reactive Forms)** conectado a **Supabase (PostgREST + RPCs + Auth)** para la gestión comercial y logística de pedidos por WhatsApp y catálogo de productos.
+Sistema web para gestionar pedidos e inventario de una distribuidora de alimentos y bebidas: catálogo en línea, creación y confirmación automática de pedidos con control de stock, despacho desde bodega y reportes por estado. Interfaz abierta (sin login).
 
----
+## Estructura
 
-## 1. Stack Tecnológico
+| Carpeta | Contenido |
+|---|---|
+| `frontend/` | Aplicación Angular 21 (standalone, signals, reactive forms) + Supabase JS |
+| `supabase/migrations/` | Esquema SQL, RLS, RPCs de negocio, auditoría, seed y apertura web (0001 → 0006) |
+| `docs/` | Documento técnico, **PROYECTO FINAL INTEGRADOR** (md/html/docx) y diagramas PlantUML |
+| `PLAN.md` | Plan de trabajo del equipo |
 
-- **Framework**: Angular 21 Standalone (Zoneless, Signals: `signal()`, `computed()`, `input()`, `output()`).
-- **Base de Datos & Auth**: `@supabase/supabase-js` v2.
-- **Formularios**: Reactive Forms con validaciones estrictas.
-- **Estilos**: SCSS / CSS Moderno con variables de diseño (Paleta Azul Marino `#0f2744` & Dorado `#d4af37`), componentes UI propios (sin Material ni component libraries).
-- **Control de Acceso (RBAC)**: Matriz de permisos estricta por rol (`admin`, `vendedor`, `bodega`).
-- **Control Flow**: Sintaxis nativa de Angular (`@if`, `@for`, `@switch`, `@let`).
+## Requisitos
 
----
+- Node.js 20+ y npm
+- Un proyecto en [Supabase](https://supabase.com) (la app apunta a `xpmccpujsxrpvkcbafzw`; cámbialo en `frontend/src/environments/environment.ts`)
 
-## 2. Usuarios de Prueba (Supabase Auth)
+## Base de datos
 
-| Correo | Contraseña | Rol Asignado | Alcance Principal |
-|---|---|---|---|
-| `admin@ladorada.test` | `Admin1234*` | **admin** | Control total, catálogo, pedidos, bodega y auditoría |
-| `vendedor@ladorada.test` | `Vende1234*` | **vendedor** | Catálogo, crear y confirmar/cancelar pedidos |
-| `bodega@ladorada.test` | `Bode1234*` | **bodega** | Ajuste de stock físico y despacho de pedidos confirmados |
-| `prueba@ladorada.test` | `Prueba1234*` | **vendedor** | Segundo vendedor para pruebas concurrentes |
+Aplica las migraciones **en orden** desde el SQL Editor de Supabase:
 
-> *Nota*: En la pantalla de login `/login`, hay botones rápidos para autocompletar estas credenciales.
+1. `0001_esquema_base.sql` — tablas, secuencia de números de pedido, grants
+2. `0002_rls_politicas.sql` — políticas RLS
+3. `0003_rpc_reglas_negocio.sql` — `crear_pedido`, `confirmar_pedido`, `despachar_pedido`, `cancelar_pedido`, `resumen_por_estado`
+4. `0004_auditoria_triggers.sql` — auditoría
+5. `0005_seed.sql` — datos de prueba (productos de ejemplo)
+6. `0006_web_abierta_sin_login.sql` — abre la app sin autenticación
 
----
-
-## 3. Matriz de Permisos Implementada (§6)
-
-| Acción en el Sistema | Admin | Vendedor | Bodega |
-|---|:---:|:---:|:---:|
-| Ver catálogo de productos | ✔ | ✔ | ✔ |
-| Crear y editar producto (nombre, precio, ref) | ✔ | ✔ | ✖ |
-| Ajustar existencias físicas en bodega | ✔ | ✖ | ✔ |
-| Activar / Desactivar producto | ✔ | ✖ | ✖ |
-| Ver listado de pedidos y detalle | ✔ | ✔ | ✔ |
-| Crear nuevo pedido WhatsApp | ✔ | ✔ | ✖ |
-| Confirmar pedido (reserva stock en servidor) | ✔ | ✔ | ✖ |
-| Cancelar pedido (reversa stock si confirmado) | ✔ | ✔ | ✖ |
-| Despachar pedido | ✔ | ✖ | ✔ |
-| Ver resumen financiero y métricas | ✔ | ✔ | ✔ |
-| Ver actividad y auditoría (trazabilidad) | ✔ | ✖ | ✖ |
-
----
-
-## 4. RPCs del Servidor Mapeadas Exactamente (§4)
-
-Todas las escrituras de pedidos se realizan **exclusivamente mediante RPC** (nunca direct inserts/updates en `pedidos` ni `pedido_items`):
-
-- `crear_pedido(p_cliente, p_items, p_observacion)`: Nace en estado `pendiente`.
-- `confirmar_pedido(p_pedido_id)`: Descuenta existencias en el servidor de forma transaccional. Si el inventario no alcanza, genera excepción `INVENTARIO_INSUFICIENTE: <detalle>` que se presenta de forma literal al usuario.
-- `despachar_pedido(p_pedido_id)`: Marca el pedido como despachado con su timestamp.
-- `cancelar_pedido(p_pedido_id, p_motivo)`: Cambia a `rechazado`, exige motivo y reversa el descuento de inventario si estaba confirmado.
-- `resumen_por_estado()`: Retorna métricas consolidadas por estado (`vw_resumen_por_estado`).
-
----
-
-## 5. Instrucciones de Ejecución
+## Frontend
 
 ```bash
-# 1. Instalar dependencias
-npm install
-
-# 2. Iniciar servidor de desarrollo
-npm run dev
-# o con angular cli estándar:
-# ng serve --port 3000
-
-# 3. Compilar para producción (Type-check estricto AOT)
-npm run build
+cd frontend
+npm ci
+ng serve          # → http://localhost:4200
 ```
 
----
+La URL de Supabase y la clave *publishable* están en `frontend/src/environments/environment.ts`. La clave publishable es pública por diseño: la protección real es RLS en la base de datos.
 
-## 6. Checklist de Verificación (Definition of Done)
+## Flujo principal (To-Be)
 
-1. [x] **Compilación**: `npm run build` compila sin errores en modo estricto.
-2. [x] **Autenticación**: Iniciar sesión con los 4 usuarios de prueba; el menú superior adapta dinámicamente sus módulos según el rol.
-3. [x] **Catálogo**:
-   - Vendedor y Admin pueden crear/editar productos.
-   - Bodega puede ajustar existencias físicas con el modal rápido y no puede editar precios ni nombres.
-   - Vendedor tiene bloqueado el ajuste manual de stock.
-   - Admin puede activar/desactivar referencias.
-4. [x] **Flujo Completo de Pedidos**:
-   - Crear pedido con múltiples productos y cálculo en vivo en moneda colombiana (COP).
-   - Confirmar pedido: descuenta stock automáticamente.
-   - Bodega visualiza el pedido confirmado y realiza el despacho.
-   - Cancelar pedido: solicita motivo obligatorio y revierte inventario si estaba confirmado.
-5. [x] **Manejo de Errores**:
-   - Detección de `INVENTARIO_INSUFICIENTE` mostrando detalle literal (ej. `disponibles X, solicitados Y`).
-   - Anti doble clic con spinners integrados en todos los botones de acción.
-6. [x] **Diseño y Responsividad**:
-   - Interfaz corporativa sobria en tonos Azul Marino y Dorado.
-   - Tarjetas apiladas automáticas en pantallas móviles (< 768px).
-   - Cero scroll horizontal en resoluciones móviles (360px).
+1. Vendedor registra el pedido **una sola vez** (captura única por WhatsApp).
+2. El servidor valida existencias y **confirma el pedido automáticamente** si el inventario alcanza (descuento único); si no, queda `pendiente` con el motivo y se corrige con el cliente.
+3. Bodega ve los pedidos confirmados en la misma app y los **despacha sin esperas**.
+4. Administración consulta el resumen por estado y consolida los pagos sobre los mismos pedidos.
+
+## Documentación
+
+- `docs/PROYECTO FINAL INTEGRADOR.md` (+ `.html`, `.docx`) — entregable oficial
+- `docs/Documento_Tecnico.md` (+ `.html`, `.docx`) — cuerpo técnico (5.1–5.10, casos de uso, matriz RF/CU/T)
+- `docs/diagramas/*.puml` — fuentes PlantUML; los `.png` están generados y referenciados en el documento

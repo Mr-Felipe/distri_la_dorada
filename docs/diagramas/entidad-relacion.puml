@@ -1,0 +1,74 @@
+' ============================================================
+' Proyecto final integrador - Distribuidora La Dorada S.A.S.
+' Apartado 5.6 - UNICO diagrama entidad-relacion
+' Modelo simplificado: productos, pedidos y pedido_items
+' Salida: entidad-relacion.png
+' ============================================================
+@startuml
+!pragma layout smetana
+title Figura 5. Diagrama entidad-relacion\nSistema de gestion de pedidos e inventario — Distribuidora La Dorada (elaboracion propia)
+
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam entityStyle rectangle
+skinparam linetype ortho
+
+entity "productos" as P {
+  * **id** : UUID <<PK>>
+  --
+  * referencia : TEXT <<UNICO>>
+  * nombre : TEXT
+  * precio : NUMERIC(12,2)\nCHECK (precio >= 0)
+  * existencias : INTEGER\nCHECK (existencias >= 0)
+  activo : BOOLEAN DEFAULT true
+  creado_en : TIMESTAMP
+  actualizado_en : TIMESTAMP
+}
+
+entity "pedidos" as PE {
+  * **id** : UUID <<PK>>
+  --
+  * numero : TEXT <<UNICO>>\nformato PED-AAAA-NNNN
+  * cliente : TEXT
+  * estado : TEXT CHECK\n('pendiente','confirmado',\n'despachado','rechazado')
+  total : NUMERIC(14,2)
+  observacion : TEXT
+  motivo_rechazo : TEXT
+  creado_en : TIMESTAMP
+  confirmado_en : TIMESTAMP
+  despachado_en : TIMESTAMP
+  rechazado_en : TIMESTAMP
+  actualizado_en : TIMESTAMP
+}
+
+entity "pedido_items" as I {
+  * **id** : UUID <<PK>>
+  --
+  * pedido_id : UUID <<FK a pedidos>>
+  * producto_id : UUID <<FK a productos>>
+  * cantidad : INTEGER CHECK (cantidad > 0)
+  precio_unitario : NUMERIC(12,2)
+}
+
+P ||--o{ I : "se incluye en\n(N:M con pedidos)"
+PE ||--o{ I : "contiene (1:N,\nborrado en cascada)"
+
+note bottom of PE
+  El estado inicia en 'pendiente'.
+  Transiciones permitidas:
+  pendiente -> confirmado / rechazado
+  confirmado -> despachado / rechazado
+  'rechazado' es definitivo.
+  El descuento de existencias ocurre
+  UNA sola vez al pasar a 'confirmado'.
+  numero con formato PED-AAAA-NNNN.
+end note
+
+note right of I
+  precio_unitario copia el precio
+  del producto al momento de
+  registrar la linea.
+end note
+
+@enduml

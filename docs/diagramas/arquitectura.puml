@@ -1,0 +1,59 @@
+' ============================================================
+' Proyecto final integrador - Distribuidora La Dorada S.A.S.
+' Apartado 5.5 - Diagrama de componentes/contenedores
+' Tres capas: interfaz, logica y datos.
+' Salida: arquitectura.png
+' ============================================================
+@startuml
+!pragma layout smetana
+title Figura 4. Arquitectura de componentes: interfaz, logica y datos\nSistema de gestion de pedidos e inventario — Distribuidora La Dorada (elaboracion propia)
+
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam componentStyle rectangle
+skinparam packageStyle rectangle
+skinparam databaseStyle Rectangle
+
+actor "Vendedor" as V
+actor "Encargada de bodega" as B
+actor "Gerente / Administracion" as G
+
+package "CAPA 1 — INTERFAZ (presentacion)" #EAF3FF {
+  component "Aplicacion Web Angular\n(standalone, TypeScript + SCSS)\npantallas: catalogo, pedido,\nestados, resumen" as WEB
+  component "Vista movil:\nla MISMA aplicacion\ndisena para 360 px\n(misma fuente en todo\ndispositivo; RNF-01:\nresponsividad)" as MOB
+}
+
+package "CAPA 2 — LOGICA (API y reglas de negocio)" #FFF6E5 {
+  component "Cliente Supabase JS\n(consultas REST y RPC,\nsin inicio de sesion)" as SDK
+  component "API REST automatica\n(PostgREST): CRUD de\nproductos y pedidos" as API
+  component "RPC / funcion transaccional\nconfirmar_pedido():\nvalida existencias, descuenta\nUNA vez y cambia estado\n(bloqueo con motivo,\ndescuento unico)" as RPC
+}
+
+package "CAPA 3 — DATOS (persistencia)" #EAFBEA {
+  database "PostgreSQL (Supabase)\ntablas: productos, pedidos,\npedido_items;\nfuente unica de verdad" as DB
+}
+
+V --> WEB
+B --> MOB
+G --> WEB
+WEB --> SDK
+MOB --> SDK
+SDK --> API
+SDK --> RPC
+API --> DB
+RPC --> DB
+
+note bottom of RPC
+  Las reglas criticas se ejecutan
+  en el servidor: el navegador
+  nunca descuenta existencias por su cuenta.
+end note
+
+note right of DB
+  Escritorio y movil consultan
+  los MISMOS registros
+  (misma fuente de datos).
+end note
+
+@enduml

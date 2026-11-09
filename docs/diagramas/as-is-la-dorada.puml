@@ -1,0 +1,68 @@
+﻿' ============================================================
+' Proyecto final integrador - Distribuidora La Dorada S.A.S.
+' Apartado 5.2 - Figure 1: proceso AS-IS (estado actual)
+' Elaboracion propia. Codigos P1-P7 relacionados con 5.1.
+' Salida: as-is-la-dorada.png
+' ============================================================
+@startuml
+!pragma layout smetana
+title Figura 1. Proceso As-Is: gestion de pedidos e inventario\nDistribuidora La Dorada S.A.S. (elaboracion propia)
+
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam swimlaneWidth 140
+skinparam roundCorner 10
+skinparam activityBackgroundColor White
+skinparam activityBorderColor Black
+skinparam activityArrowColor Black
+
+|Cliente (tiendas, restaurantes, comercios)|
+start
+:Pide por WhatsApp:\nproductos y cantidades;
+
+|Ventas (2 vendedores)|
+:Transcribe el pedido en la\nhoja de cálculo de ventas (<color:#B00020>P1</color>);
+:Consulta a bodega por\ncanal directo (mensaje/verbal) (<color:#B00020>P2</color>);
+
+|Bodega (encargada)|
+:Revisa su propio archivo\nde existencias, separado\ndel de ventas (<color:#B00020>P2</color>);
+
+|Ventas (2 vendedores)|
+if (¿Hay existencias?) then (no)
+  :Pide al cliente aceptar\ncambios o reducir cantidades (<color:#B00020>P3</color>);
+  |Cliente (tiendas, restaurantes, comercios)|
+  :Aprueba o rechaza\nel cambio;
+  |Ventas (2 vendedores)|
+  :Ajusta el pedido y\nvuelve a consultar\n(retrabajo) (<color:#B00020>P4</color>);
+  |Bodega (encargada)|
+  :Revisa de nuevo su archivo;
+  |Ventas (2 vendedores)|
+endif
+:Promete fecha de entrega,\na veces sin confirmación escrita\nde bodega (<color:#B00020>P5</color>);
+
+|Bodega (encargada)|
+:Prepara y despacha\nlos pedidos confirmados;
+:Actualiza su archivo de\nexistencias de forma manual (<color:#B00020>P2</color>);
+
+|Administración (auxiliar)|
+:Consolida los pagos\nal final del día (<color:#B00020>P6</color>);
+
+|Gerencia|
+:Sin vista compartida del estado\ndel pedido; se entera por\nlas áreas o por los reclamos (<color:#B00020>P7</color>);
+stop
+
+legend bottom
+  |= Clave |= Significado (coincide con 5.1) |
+  | <#FFB3B3> | P = problema observado en el proceso actual |
+  | | P1: dos archivos paralelos (ventas y bodega), sin fuente única |
+  | | P2: disponibilidad confirmada de forma manual y secuencial (40 min) |
+  | | P3: faltante de existencias que obliga a cambiar el pedido (15/100) |
+  | | P4: correcciones por captura manual, con retrabajo (20/100) |
+  | | P5: promesa de entrega sin confirmación escrita de bodega |
+  | | P6: pago consolidado al cierre, sin vínculo con el pedido |
+  | | P7: ningún actor ve el estado global del pedido |
+  | | Hechos y hipótesis asociadas: ver apartado 5.1 |
+endlegend
+
+@enduml

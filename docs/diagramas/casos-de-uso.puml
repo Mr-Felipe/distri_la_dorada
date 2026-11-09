@@ -1,0 +1,83 @@
+' ============================================================
+' Proyecto final integrador - Distribuidora La Dorada S.A.S.
+' Apartado 5.4 - Diagrama GENERAL de casos de uso
+' (unico diagrama de casos de uso del documento)
+' Salida: casos-de-uso.png
+' ============================================================
+@startuml
+!pragma layout smetana
+title Figura 3. Diagrama general de casos de uso\nSistema de gestion de pedidos e inventario — Distribuidora La Dorada (elaboracion propia)
+
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam packageStyle rectangle
+skinparam actorStyle awesome
+skinparam usecaseBackgroundColor White
+skinparam usecaseBorderColor Black
+
+left to right direction
+
+actor "Vendedor\n(2)" as V
+actor "Encargada\nde bodega" as B
+actor "Auxiliar\nadministrativo /\nGerente" as G
+
+rectangle "Sistema de gestion de pedidos e inventario" {
+
+  usecase "CU-01 Consultar catalogo\nde productos, precios\ny existencias (RF-01)" as CU1
+  usecase "CU-02 Registrar o editar\nproductos (RF-02)" as CU2
+  usecase "CU-03 Registrar pedido\ncon productos y cantidades\n(RF-03)" as CU3
+  usecase "CU-04 Validar disponibilidad\ny confirmar pedido (RF-04)" as CU4
+  usecase "CU-05 Consultar pedidos\ny su estado (RF-05)" as CU5
+  usecase "CU-06 Actualizar estado\ndel pedido (RF-05)" as CU6
+  usecase "CU-07 Resumen de pedidos\npor estado (RF-07)" as CU7
+  usecase "CU-08 Cancelar pedido\n(RF-09)" as CU8
+}
+
+V --> CU1
+V --> CU3
+V --> CU5
+V --> CU8
+B --> CU1
+B --> CU2
+B --> CU5
+B --> CU6
+G --> CU2
+G --> CU5
+G --> CU7
+G --> CU8
+
+CU3 ..> CU4 : <<include>>
+CU5 ..> CU8 : <<extend>>
+
+note right of CU4
+  Toda confirmacion incluye la
+  validacion de existencias y el
+  descuento UNA sola vez
+  (bloqueo con motivo;
+  descuento unico).
+end note
+
+note bottom of CU1
+  El sistema es una web abierta:
+  no exige inicio de sesion
+  (RF-08 no implementado).
+end note
+
+note bottom of CU3
+  Si no hay correcciones (el inventario
+  alcanza), el pedido queda CONFIRMADO
+  automaticamente al registrarlo y bodega
+  lo despacha; si falta inventario, queda
+  PENDIENTE con el motivo (incluido en
+  CU-04).
+end note
+
+legend bottom
+  |= Relacion |= Significado |
+  | ----> | participacion directa del actor |
+  | ..> <<include>> | el caso base ejecuta siempre el incluido |
+  | ..> <<extend>> | el caso se ejecuta solo bajo la condicion indicada |
+endlegend
+
+@enduml

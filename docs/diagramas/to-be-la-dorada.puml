@@ -1,0 +1,66 @@
+﻿' ============================================================
+' Proyecto final integrador - Distribuidora La Dorada S.A.S.
+' Apartado 5.2 - Figura 2: proceso TO-BE (estado propuesto)
+' Elaboracion propia. Codigos M1-M6 relacionados con la tabla
+' de mejoras del apartado 5.2.
+' Salida: to-be-la-dorada.png
+' ============================================================
+@startuml
+!pragma layout smetana
+title Figura 2. Proceso To-Be: pedidos e inventario con la aplicacion\nDistribuidora La Dorada S.A.S. (elaboracion propia)
+
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam swimlaneWidth 140
+skinparam roundCorner 10
+skinparam activityBackgroundColor White
+skinparam activityBorderColor Black
+skinparam activityArrowColor Black
+
+|Cliente (tiendas, restaurantes, comercios)|
+start
+:Pide por WhatsApp\n(canal de recepción se mantiene);
+
+|Ventas (2 vendedores)|
+:Registra el pedido en la app web\n(captura única, una sola vez) (<color:#1B7F3B>M1</color>);
+
+|Aplicacion (logica y datos)|
+:Valida cantidades > 0, registra el pedido\ny consulta existencias en tiempo real (<color:#1B7F3B>M2</color>);
+if (¿Inventario\nsuficiente?) then (no)
+  :Bloquea la confirmacion: el pedido queda\nPENDIENTE y muestra el motivo concreto (<color:#1B7F3B>M3</color>);
+  |Ventas (2 vendedores)|
+  :Acuerda el cambio con el cliente\ncon el pedido abierto en pantalla;
+  |Cliente (tiendas, restaurantes, comercios)|
+  :Acepta o rechaza el cambio;
+  |Aplicacion (logica y datos)|
+  :Corrige lineas y revalida\n(sin descuento de existencias);
+else (sí)
+  :CONFIRMACION AUTOMATICA: el pedido\nqueda CONFIRMADO al registrarlo y\ndesconta existencias UNA sola vez, en\nla misma operacion transaccional (<color:#1B7F3B>M2</color>);
+endif
+:Asigna estado y queda visible\npara todos los actores (<color:#1B7F3B>M4</color>);
+
+|Bodega (encargada)|
+:Ve los pedidos confirmados en la\nmisma aplicacion, sin esperar\nconfirmacion manual (<color:#1B7F3B>M4</color>);
+:Prepara y despacha;\ncambia el estado a despachado;
+:Las existencias actualizadas quedan\nvisibles para ventas de inmediato (<color:#1B7F3B>M2</color>);
+
+|Administración (auxiliar)|
+:Consulta el resumen de pedidos\npor estado y consolida los pagos\ncon el mismo registro (<color:#1B7F3B>M5</color>);
+
+|Gerencia|
+:Consulta la misma fuente de datos:\nestados, pendientes e histórico (<color:#1B7F3B>M6</color>);
+stop
+
+legend bottom
+  |= Clave |= Significado (tabla de mejoras en 5.2) |
+  | <#C6EFCE> | M = mejora propuesta respecto al As-Is |
+  | | M1: fuente única: un solo registro del pedido |
+  | | M2: validación y descuento único de inventario |
+  | | M3: bloqueo explícito con motivo del faltante |
+  | | M4: estados compartidos y transiciones coherentes |
+  | | M5: pagos y resumen sobre el mismo pedido |
+  | | M6: visibilidad de gestión en tiempo real |
+endlegend
+
+@enduml

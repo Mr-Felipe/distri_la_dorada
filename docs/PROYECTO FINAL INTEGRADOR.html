@@ -1,0 +1,1971 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Documento Tecnico - Distribuidora La Dorada</title>
+<style>
+body { font-family: Arial, sans-serif; font-size: 11pt; line-height: 1.35; color: #111; }
+h1 { font-size: 16pt; color: #1f3864; border-bottom: 2px solid #1f3864; padding-bottom: 4px; page-break-before: always; }
+h1:first-of-type { page-break-before: avoid; }
+h2 { font-size: 14pt; color: #1f3864; margin-top: 18pt; }
+h3 { font-size: 12pt; color: #2e5395; margin-top: 14pt; }
+h4 { font-size: 11.5pt; color: #2e5395; }
+table { border-collapse: collapse; width: 100%; margin: 8pt 0 12pt 0; font-size: 9.5pt; }
+th, td { border: 1px solid #8a8a8a; padding: 4px 6px; vertical-align: top; }
+th { background-color: #d9e2f3; font-weight: bold; }
+blockquote { border-left: 3px solid #1f3864; background: #f2f5fb; margin: 8pt 0; padding: 6px 12px; }
+code { font-family: Consolas, monospace; font-size: 9.5pt; background: #f0f0f0; }
+img { max-width: 100%; }
+ul, ol { margin-top: 4pt; }
+hr { border: none; border-top: 1px solid #bbb; margin: 14pt 0; }
+</style>
+</head>
+<body>
+<p>PROYECTO FINAL INTEGRADOR</p>
+<p>Sistema de gestión de pedidos e inventario | Distribuidora La Dorada</p>
+<p>Asignatura: Desarrollo de Sistemas de Información Empresariales</p>
+<p>Equipos de 3 estudiantes · 4 jornadas de 4 horas · Trabajo autónomo complementario</p>
+<h1><strong>1. Contexto empresarial</strong></h1>
+<p>Distribuidora La Dorada S.A.S. es una empresa ficticia dedicada a vender artículos de aseo y limpieza a tiendas, restaurantes y pequeños comercios. Tiene una gerente, dos vendedores, una encargada de bodega y un auxiliar administrativo.</p>
+<p>Los clientes solicitan productos por WhatsApp. Ventas transcribe los pedidos a una hoja de cálculo y consulta a bodega, que controla existencias en otro archivo. Cuando faltan unidades, ventas solicita al cliente aceptar cambios. Bodega prepara y despacha los pedidos confirmados; administración consolida pagos al final del día. No existe una vista compartida del estado de los pedidos y algunas entregas se prometen sin confirmación escrita de bodega.</p>
+<p>En una semana ficticia se recibieron 100 pedidos: 20 requirieron correcciones, 15 se retrasaron por falta de existencias y confirmar disponibilidad tomó 40 minutos en promedio. Estos datos son didácticos: no demuestran por sí solos las causas de cada dificultad.</p>
+<p>La gerencia les encarga analizar el proceso y desarrollar una primera versión funcional que conecte productos, inventario y pedidos.</p>
+<h1><strong>2. Objetivo y resultado esperado</strong></h1>
+<p>Analizar, diseñar, construir y validar un sistema de información empresarial que permita consultar productos, registrar pedidos, verificar existencias y hacer seguimiento a sus estados. Deben demostrar correspondencia entre el problema empresarial, la documentación, la arquitectura y el software ejecutable.</p>
+<h1><strong>3. Alcance del sistema</strong></h1>
+<p>·        Una aplicación web responsiva, utilizable desde computador y teléfono. Una aplicación móvil nativa es opcional y no genera puntos adicionales por sí sola.<br>
+·        Catálogo de productos con referencia o nombre, precio, existencias y operaciones básicas de consulta, registro o edición.<br>
+·        Registro de pedidos con uno o varios productos, cantidades y validación de disponibilidad antes de confirmar.<br>
+·        Consulta del detalle y estado de los pedidos; cambios de estado coherentes.<br>
+·        Persistencia: la información se guarda y puede recuperarse al cerrar y abrir nuevamente la aplicación.<br>
+·        Trabajen con datos ficticios. No se exige WhatsApp integrado, pagos reales, facturación fiscal, contabilidad ni logística avanzada.</p>
+<h1><strong>4. Reglas de negocio obligatorias</strong></h1>
+<p>·        Rechazar cantidades menores o iguales a cero.<br>
+·        Impedir la confirmación si el inventario disponible es insuficiente y mostrar el motivo.<br>
+·        Descontar existencias una sola vez al confirmar; evitar descuentos duplicados.<br>
+·        Definir estados (por ejemplo: pendiente, confirmado, despachado y rechazado), transiciones permitidas y tratamiento de cancelaciones.<br>
+·        La vista de escritorio y la móvil deben consultar los mismos registros.</p>
+<h1><strong>5. Documento técnico: apartados únicos y obligatorios</strong></h1>
+<p>Entreguen un solo documento, con los siguientes apartados. No repitan diagramas, tablas o pruebas en otras secciones.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Apartado</th>
+<th style="text-align: left;">Contenido y evidencia requerida</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><strong>5.1 Diagnóstico y actores</strong></td>
+<td style="text-align: left;">Descripción del negocio; problemas y posibles causas (distinguir hechos de hipótesis); áreas, actores y flujo de información.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>5.2 Procesos As-Is y To-Be</strong></td>
+<td style="text-align: left;">Un diagrama del proceso actual y otro del propuesto; tabla con al menos cuatro mejoras esperadas.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>5.3 Requerimientos y alcance</strong></td>
+<td style="text-align: left;">Catálogo de requerimientos funcionales y al menos cuatro no funcionales verificables; códigos, prioridad MoSCoW, criterio de aceptación y exclusiones.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>5.4 Historias y casos de uso</strong></td>
+<td style="text-align: left;">Tres historias de usuario; un diagrama general de casos de uso; dos casos detallados con flujo principal y alterno.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>5.5 Arquitectura e integración</strong></td>
+<td style="text-align: left;">Arquitectura elegida y justificación; diagrama de componentes/contenedores con interfaz, lógica y datos; tres principios arquitectónicos. Explicar EN ESTE MISMO apartado cómo interactúan productos, pedidos e inventario.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>5.6 Modelo de datos</strong></td>
+<td style="text-align: left;">Un único diagrama entidad-relación con entidades, atributos clave y cardinalidades; correspondencia con la persistencia implementada.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>5.7 Seguridad y roles</strong></td>
+<td style="text-align: left;">Matriz sencilla de permisos propuestos para administrador, vendedor y bodega; tres riesgos y medidas de prevención. Distinguir controles implementados de propuestos; autenticación por roles no es obligatoria.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>5.8 Pruebas funcionales</strong></td>
+<td style="text-align: left;">Una única matriz de tres pruebas mínimas con entradas, pasos, resultado esperado, resultado obtenido y evidencia. Usar los escenarios de la sección 8; no crear otro informe de pruebas.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>5.9 Métricas de éxito</strong></td>
+<td style="text-align: left;">Tres indicadores propuestos (definición, cómo medirlos y meta hipotética) para evaluar una futura implantación. No inventar resultados reales.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>5.10 Balance final</strong></td>
+<td style="text-align: left;">Qué se implementó, qué quedó pendiente, limitaciones y una mejora futura priorizada.</td>
+</tr>
+</tbody>
+</table>
+<h1><strong>6. Requerimientos funcionales mínimos de referencia</strong></h1>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Código</th>
+<th style="text-align: left;">Funcionalidad</th>
+<th style="text-align: left;">Prioridad</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><strong>RF-01</strong></td>
+<td style="text-align: left;">Consultar productos, precios y existencias</td>
+<td style="text-align: left;">Must</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>RF-02</strong></td>
+<td style="text-align: left;">Registrar o editar productos</td>
+<td style="text-align: left;">Must</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>RF-03</strong></td>
+<td style="text-align: left;">Registrar pedidos con productos y cantidades</td>
+<td style="text-align: left;">Must</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>RF-04</strong></td>
+<td style="text-align: left;">Validar existencias y bloquear confirmación inválida</td>
+<td style="text-align: left;">Must</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>RF-05</strong></td>
+<td style="text-align: left;">Consultar pedidos y actualizar estados</td>
+<td style="text-align: left;">Must</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>RF-06</strong></td>
+<td style="text-align: left;">Guardar y recuperar registros</td>
+<td style="text-align: left;">Must</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>RF-07</strong></td>
+<td style="text-align: left;">Resumen de pedidos por estado</td>
+<td style="text-align: left;">Should</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>RF-08</strong></td>
+<td style="text-align: left;">Autenticación y permisos diferenciados</td>
+<td style="text-align: left;">Could</td>
+</tr>
+</tbody>
+</table>
+<p>Importante: la matriz de roles del apartado 5.7 es documental; implementar autenticación y permisos es opcional (RF-08). No confundan una propuesta de seguridad con una funcionalidad desarrollada.</p>
+<h1><strong>7. Cronograma de las cuatro jornadas</strong></h1>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Jornada</th>
+<th style="text-align: left;">Actividades prioritarias</th>
+<th style="text-align: left;">Evidencia de avance</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><strong>1 · Análisis</strong></td>
+<td style="text-align: left;">Diagnóstico, actores, As-Is/To-Be, alcance y requerimientos MoSCoW.</td>
+<td style="text-align: left;">Apartados 5.1–5.3 en borrador.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>2 · Diseño</strong></td>
+<td style="text-align: left;">Historias, casos, arquitectura e integración, modelo de datos; iniciar catálogo y persistencia.</td>
+<td style="text-align: left;">Apartados 5.4–5.6 y primer módulo ejecutable.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>3 · Construcción</strong></td>
+<td style="text-align: left;">Pedidos, validaciones, estados, persistencia y vista móvil; definir matriz de roles.</td>
+<td style="text-align: left;">Sistema que acepte y rechace pedidos según inventario.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>4 · Validación</strong></td>
+<td style="text-align: left;">Ejecutar matriz de pruebas, proponer métricas, completar documento y sustentar.</td>
+<td style="text-align: left;">Entrega integrada y demostración en vivo.</td>
+</tr>
+</tbody>
+</table>
+<p>El desarrollo continúa fuera del aula. Repartan responsabilidades, integren avances frecuentemente y prioricen las funcionalidades Must.</p>
+<h1><strong>8. Escenarios de prueba y demostración</strong></h1>
+<p>Registren los siguientes tres escenarios una sola vez en la matriz del apartado 5.8 y ejecutarlos en la sustentación:</p>
+<p>·        Pedido válido: con 20 detergentes disponibles, solicitar 5; confirmar y comprobar que las existencias se actualizan una sola vez.<br>
+·        Pedido inválido: con 8 jabones disponibles, solicitar 12; impedir confirmación sin modificar existencias.<br>
+·        Consulta móvil y persistencia: consultar un pedido desde teléfono o emulador; cerrar y reabrir la aplicación y comprobar que se conserva el registro.</p>
+<h1><strong>9. Entrega final</strong></h1>
+<p>·        Documento técnico único (Word o PDF), con los diez apartados de la sección 5 y diagramas legibles.<br>
+·        Código fuente o repositorio, más README con instrucciones de instalación/ejecución y datos de prueba.<br>
+·        Sistema ejecutable durante la demostración, local o publicado.<br>
+·        Presentación breve para sustentar el problema, las decisiones y la solución.</p>
+<h1><strong>10. Sustentación final (15 minutos por equipo)</strong></h1>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Actividad</th>
+<th style="text-align: left;">Tiempo</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><strong>Problema y procesos As-Is/To-Be</strong></td>
+<td style="text-align: left;">3 min</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Requerimientos, arquitectura e integración</strong></td>
+<td style="text-align: left;">3 min</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Demostración web/móvil y tres escenarios de prueba</strong></td>
+<td style="text-align: left;">6 min</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Preguntas individuales</strong></td>
+<td style="text-align: left;">3 min</td>
+</tr>
+</tbody>
+</table>
+<p>Todos los integrantes deben participar y explicar decisiones, reglas, almacenamiento y limitaciones. Se evaluará la comprensión individual, no solo la apariencia de las pantallas.</p>
+<h1><strong>11. Rúbrica de evaluación</strong></h1>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Criterio</th>
+<th style="text-align: left;">Peso</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><strong>Análisis empresarial y As-Is/To-Be</strong></td>
+<td style="text-align: left;">15 %</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Requerimientos, MoSCoW, historias y casos de uso</strong></td>
+<td style="text-align: left;">15 %</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Arquitectura, integración, modelo de datos y seguridad propuesta</strong></td>
+<td style="text-align: left;">15 %</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Desarrollo funcional web y móvil</strong></td>
+<td style="text-align: left;">30 %</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Pruebas y reglas de negocio</strong></td>
+<td style="text-align: left;">10 %</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Sustentación, métricas y dominio individual</strong></td>
+<td style="text-align: left;">15 %</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>TOTAL</strong></td>
+<td style="text-align: left;">100 %</td>
+</tr>
+</tbody>
+</table>
+<p>El proyecto integrador equivale al 45 % de la nota de la asignatura. Los nuevos temas se valoran dentro de esta misma rúbrica: no son una actividad ni una calificación adicional.</p>
+<h1><strong>12. Indicaciones finales</strong></h1>
+<p>Pueden utilizar tecnologías conocidas, documentación, Internet y herramientas de IA como apoyo, siempre que comprendan y puedan explicar su trabajo. Un prototipo navegable sin reglas ejecutables y sin persistencia no cumple el mínimo. Documenten honestamente qué funciona y qué queda propuesto.</p>
+<p>Criterio central: una solución coherente y verificable vale más que muchas pantallas o funcionalidades incompletas.</p>
+<hr>
+<h1>DOCUMENTO TÉCNICO — Sistema de gestión de pedidos e inventario</h1>
+<h2>Distribuidora La Dorada S.A.S.</h2>
+<table>
+<thead>
+<tr>
+<th>Campo</th>
+<th>Detalle</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Asignatura</td>
+<td>Desarrollo de Sistemas de Información Empresariales</td>
+</tr>
+<tr>
+<td>Proyecto</td>
+<td>Proyecto final integrador — sistema de pedidos e inventario</td>
+</tr>
+<tr>
+<td>Equipo</td>
+<td><strong>Equipo 5</strong> — Felipe González · Juan Esteban Alzate · Santiago Castrillón</td>
+</tr>
+<tr>
+<td>Grupo</td>
+<td>[Grupo]</td>
+</tr>
+<tr>
+<td>Fecha</td>
+<td>[dd/mm/aaaa]</td>
+</tr>
+<tr>
+<td>Versión del documento</td>
+<td>v3.3 — web abierta sin inicio de sesión (RF-08 no implementado), modelo de datos simplificado a las tres entidades del negocio</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>Regla de la guía:</strong> cada diagrama, tabla o prueba aparece <strong>una sola vez</strong> y en su apartado. Este documento no repite contenido entre secciones.</p>
+</blockquote>
+<h3>Estado de los apartados</h3>
+<table>
+<thead>
+<tr>
+<th>Apartado</th>
+<th>Título</th>
+<th>Estado</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>5.1</td>
+<td>Diagnóstico y actores</td>
+<td>✅ Borrador completo</td>
+</tr>
+<tr>
+<td>5.2</td>
+<td>Procesos As-Is y To-Be</td>
+<td>✅ Borrador completo (diagramas + tabla de mejoras)</td>
+</tr>
+<tr>
+<td>5.3</td>
+<td>Requerimientos y alcance</td>
+<td>✅ Borrador completo</td>
+</tr>
+<tr>
+<td>5.4</td>
+<td>Historias y casos de uso</td>
+<td>✅ Borrador completo (3 historias + <strong>8 casos de uso detallados</strong>)</td>
+</tr>
+<tr>
+<td>5.5</td>
+<td>Arquitectura e integración</td>
+<td>✅ Borrador completo</td>
+</tr>
+<tr>
+<td>5.6</td>
+<td>Modelo de datos</td>
+<td>✅ Completo (tablas desplegadas en Supabase — ver 5.6.4)</td>
+</tr>
+<tr>
+<td>5.7</td>
+<td>Seguridad y roles</td>
+<td>✅ Matriz propuesta documental (RF-08 no implementado: la web es abierta)</td>
+</tr>
+<tr>
+<td>5.8</td>
+<td>Pruebas funcionales</td>
+<td>🟡 T-01 y T-02 ejecutadas con resultado real; T-03 pendiente de evidencia en navegador móvil</td>
+</tr>
+<tr>
+<td>5.9</td>
+<td>Métricas de éxito</td>
+<td>✅ Borrador completo (metas hipotéticas)</td>
+</tr>
+<tr>
+<td>5.10</td>
+<td>Balance final</td>
+<td>✅ Actualizado con lo construido y lo pendiente</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h1>JORNADA 1 · ANÁLISIS</h1>
+<h2>5.1 Diagnóstico y actores</h2>
+<h3>5.1.1 Descripción del negocio</h3>
+<p>Distribuidora La Dorada S.A.S. es una empresa ficticia que vende <strong>artículos de aseo y limpieza</strong> a tiendas, restaurantes y pequeños comercios. Su planta organizacional es pequeña: <strong>una gerente, dos vendedores, una encargada de bodega y un auxiliar administrativo</strong>.</p>
+<p>El proceso actual funciona así: los clientes piden por <strong>WhatsApp</strong>; el área de ventas <strong>transcribe los pedidos a una hoja de cálculo</strong> y consulta a bodega, que controla las existencias en <strong>otro archivo distinto</strong>. Cuando faltan unidades, ventas pide al cliente que acepte los cambios. Bodega prepara y despacha los pedidos confirmados y administración <strong>consolida los pagos al final del día</strong>. No existe una vista compartida del estado de los pedidos, y algunas entregas se prometen <strong>sin confirmación escrita de bodega</strong>.</p>
+<p>La gerencia encarga al equipo analizar el proceso y construir una <strong>primera versión funcional</strong> que conecte productos, inventario y pedidos.</p>
+<h3>5.1.2 Hechos y datos vs. hipótesis</h3>
+<p>La guía exige <strong>distinguir los hechos de las hipótesis</strong>. Los hechos son datos que el caso entrega; las hipótesis son causas posibles que el equipo propone y que deben verificarse con el sistema o con medición, no se presentan como causas probadas.</p>
+<p><strong>Hechos del caso (datos entregados):</strong></p>
+<table>
+<thead>
+<tr>
+<th>Código</th>
+<th>Hecho</th>
+<th>Dato</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>H-1</td>
+<td>Los pedidos llegan por WhatsApp y se transcriben a una hoja de cálculo</td>
+<td>—</td>
+</tr>
+<tr>
+<td>H-2</td>
+<td>Ventas y bodega manejan archivos de información separados</td>
+<td>2 archivos paralelos</td>
+</tr>
+<tr>
+<td>H-3</td>
+<td>Pedidos recibidos en una semana ficticia</td>
+<td>100 pedidos</td>
+</tr>
+<tr>
+<td>H-4</td>
+<td>Pedidos que requirieron correcciones</td>
+<td>20 (20 %)</td>
+</tr>
+<tr>
+<td>H-5</td>
+<td>Pedidos retrasados por falta de existencias</td>
+<td>15 (15 %)</td>
+</tr>
+<tr>
+<td>H-6</td>
+<td>Tiempo promedio para confirmar disponibilidad</td>
+<td>40 minutos</td>
+</tr>
+<tr>
+<td>H-7</td>
+<td>No hay vista compartida del estado de los pedidos</td>
+<td>—</td>
+</tr>
+<tr>
+<td>H-8</td>
+<td>Algunas entregas se prometen sin confirmación escrita de bodega</td>
+<td>—</td>
+</tr>
+<tr>
+<td>H-9</td>
+<td>Los pagos se consolidan al final del día</td>
+<td>1 consolidado diario</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>La guía advierte que estos datos <strong>son didácticos: no demuestran por sí solos las causas</strong> de cada dificultad. Por eso las causas se enuncian como hipótesis.</p>
+</blockquote>
+<p><strong>Hipótesis de causa (por verificar):</strong></p>
+<table>
+<thead>
+<tr>
+<th>Código</th>
+<th>Hipótesis de causa</th>
+<th>Hecho que la motiva</th>
+<th>Cómo verificarla</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>X-1</td>
+<td>La información fragmentada entre dos archivos obliga a re-digitar y genera datos inconsistentes</td>
+<td>H-1 (los pedidos llegan por WhatsApp y se transcriben a una hoja de cálculo) y H-2 (ventas y bodega manejan archivos separados)</td>
+<td>Comparar el mismo pedido en ambos archivos tras la implementación</td>
+</tr>
+<tr>
+<td>X-2</td>
+<td>La confirmación de disponibilidad es secuencial y depende de una persona, lo que explica los 40 minutos</td>
+<td>H-6 (40 minutos en promedio para confirmar disponibilidad)</td>
+<td>Medir el tiempo de confirmación con la aplicación (ver 5.9)</td>
+</tr>
+<tr>
+<td>X-3</td>
+<td>Al no validar existencias antes de prometer, se aceptan pedidos que no se pueden cumplir</td>
+<td>H-5 (15 pedidos retrasados por falta de existencias) y H-8 (entregas prometidas sin confirmación escrita de bodega)</td>
+<td>Contar los pedidos bloqueados por inventario con el motivo registrado</td>
+</tr>
+<tr>
+<td>X-4</td>
+<td>La ausencia de estados compartidos impide saber en qué va cada pedido</td>
+<td>H-7 (no hay vista compartida del estado de los pedidos)</td>
+<td>Consultar el estado del pedido desde las tres áreas en la misma pantalla</td>
+</tr>
+<tr>
+<td>X-5</td>
+<td>Las correcciones se originan en la captura manual sin validación en el momento</td>
+<td>H-4 (20 de 100 pedidos requirieron correcciones)</td>
+<td>Registrar el motivo de cada corrección en la app</td>
+</tr>
+</tbody>
+</table>
+<h3>5.1.3 Problemas identificados y posibles causas</h3>
+<table>
+<thead>
+<tr>
+<th>Código</th>
+<th>Problema (fenómeno observable)</th>
+<th>Hecho que lo demuestra</th>
+<th>Posible causa (hipótesis)</th>
+<th>Consecuencia</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>P1</td>
+<td>Ventas y bodega trabajan sobre archivos distintos con la misma información</td>
+<td>H-1 (pedidos por WhatsApp transcritos a una hoja de cálculo) y H-2 (dos archivos de información separados)</td>
+<td>X-1: no existe una fuente única de datos</td>
+<td>Doble digitación, datos desactualizados, sin trazabilidad</td>
+</tr>
+<tr>
+<td>P2</td>
+<td>Confirmar la disponibilidad toma 40 minutos en promedio</td>
+<td>H-6 (40 minutos en promedio)</td>
+<td>X-2: la consulta es manual, secuencial y depende de una persona</td>
+<td>Pedidos demorados y promesas de entrega poco confiables</td>
+</tr>
+<tr>
+<td>P3</td>
+<td>15 de 100 pedidos se retrasaron por falta de existencias y obligaron a cambiar el pedido</td>
+<td>H-5 (15 de 100 pedidos retrasados)</td>
+<td>X-3: no hay validación de inventario antes de comprometer la entrega</td>
+<td>Retrasos, cambios de último momento, molestia del cliente</td>
+</tr>
+<tr>
+<td>P4</td>
+<td>20 de 100 pedidos requirieron correcciones y generaron retrabajo</td>
+<td>H-4 (20 de 100 pedidos con correcciones)</td>
+<td>X-5: la captura es manual y sin validación en el origen</td>
+<td>Reproceso en ventas y bodega, pérdida de tiempo</td>
+</tr>
+<tr>
+<td>P5</td>
+<td>Algunas entregas se prometen sin confirmación escrita de bodega</td>
+<td>H-8 (promesas de entrega sin confirmación escrita)</td>
+<td>X-3 y X-4: no hay registro formal de la preparación del pedido</td>
+<td>Compromisos incumplidos y reprogramaciones</td>
+</tr>
+<tr>
+<td>P6</td>
+<td>Los pagos se consolidan al cierre sin vínculo formal con el estado de cada pedido</td>
+<td>H-9 (los pagos se consolidan al final del día)</td>
+<td>X-1: la consolidación no se apoya en un registro único de pedidos</td>
+<td>Dificultad para conciliar qué se pagó, qué se despachó y qué está pendiente</td>
+</tr>
+<tr>
+<td>P7</td>
+<td>No hay una vista compartida del estado del pedido</td>
+<td>H-7 (no hay vista compartida del estado)</td>
+<td>X-4: el proceso no modela estados ni transiciones</td>
+<td>Cada área responde versiones distintas al cliente</td>
+</tr>
+</tbody>
+</table>
+<h3>5.1.4 Áreas y actores</h3>
+<table>
+<thead>
+<tr>
+<th>Actor</th>
+<th>Rol en el proceso</th>
+<th>Área</th>
+<th>Interés principal</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Cliente (tiendas, restaurantes, comercios)</td>
+<td>Solicita productos y cantidades; aprueba cambios cuando falta inventario</td>
+<td>Externo</td>
+<td>Recibir lo pedido, completo y a tiempo</td>
+</tr>
+<tr>
+<td>Vendedor (×2)</td>
+<td>Transcribe el pedido, consulta disponibilidad, acuerda cambios, promete entrega</td>
+<td>Ventas</td>
+<td>Registrar pedidos rápido y con información confiable</td>
+</tr>
+<tr>
+<td>Encargada de bodega</td>
+<td>Controla existencias, prepara y despacha los pedidos confirmados</td>
+<td>Bodega</td>
+<td>Saber qué preparar y no vender unidades inexistentes</td>
+</tr>
+<tr>
+<td>Auxiliar administrativo</td>
+<td>Consolida los pagos al final del día</td>
+<td>Administración</td>
+<td>Conciliar pagos con pedidos entregados</td>
+</tr>
+<tr>
+<td>Gerente</td>
+<td>Supervisa y recibe los reclamos</td>
+<td>Gerencia</td>
+<td>Visibilidad del estado y del desempeño</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>Los roles de esta tabla son <strong>roles del proceso</strong> (actores del caso), no usuarios del sistema: en esta versión la web es <strong>abierta y no distingue usuarios</strong> (RF-08 no implementado); la matriz de permisos por rol del apartado 5.7 es una propuesta documental.</p>
+</blockquote>
+<h3>5.1.5 Flujo de información actual</h3>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Emisor</th>
+<th>Información</th>
+<th>Receptor</th>
+<th>Medio actual</th>
+<th>Problema asociado</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Cliente</td>
+<td>Solicitud (productos, cantidades)</td>
+<td>Ventas</td>
+<td>WhatsApp</td>
+<td>Sin registro estructurado</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Ventas</td>
+<td>Pedido transcrito</td>
+<td>Ventas (su archivo)</td>
+<td>Hoja de cálculo</td>
+<td>P1 (archivos paralelos sin fuente única)</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Ventas</td>
+<td>Pregunta de disponibilidad</td>
+<td>Bodega</td>
+<td>Mensaje o verbal</td>
+<td>P2 (consulta manual, 40 min en promedio)</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Bodega</td>
+<td>Respuesta de existencias (de su archivo)</td>
+<td>Ventas</td>
+<td>Mensaje o verbal</td>
+<td>P1 (archivos paralelos) y P2 (consulta manual)</td>
+</tr>
+<tr>
+<td>5</td>
+<td>Ventas</td>
+<td>Propuesta de cambio por faltantes</td>
+<td>Cliente</td>
+<td>WhatsApp</td>
+<td>P3 (faltante de existencias que obliga a cambiar el pedido)</td>
+</tr>
+<tr>
+<td>6</td>
+<td>Ventas</td>
+<td>Promesa de fecha de entrega</td>
+<td>Cliente</td>
+<td>WhatsApp</td>
+<td>P5 (promesa sin confirmación escrita de bodega)</td>
+</tr>
+<tr>
+<td>7</td>
+<td>Bodega</td>
+<td>Pedido preparado/despachado</td>
+<td>Ventas y Administración</td>
+<td>Informal / sin registro</td>
+<td>P5 (sin confirmación escrita) y P7 (sin vista compartida del estado)</td>
+</tr>
+<tr>
+<td>8</td>
+<td>Administración</td>
+<td>Consolidado de pagos del día</td>
+<td>Gerencia</td>
+<td>Hoja de cálculo</td>
+<td>P1 (dos archivos paralelos) y P6 (pagos sin vínculo con el pedido)</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2>5.2 Procesos As-Is y To-Be</h2>
+<h3>5.2.1 Proceso actual (As-Is)</h3>
+<p><img alt="Figura 1. Proceso As-Is de la Distribuidora La Dorada" src="C:/Users/veran/OneDrive/Desktop/Semestre 6/Desarrollo sistemas empresariales/Proyecto_Final_Distribuidora_La_Dorada/docs/diagramas/as-is-la-dorada.png"></p>
+<p><em>Figura 1. Proceso As-Is (elaboración propia con PlantUML). El color rojo marca los puntos críticos; los códigos P1–P7 corresponden a la tabla de problemas del apartado 5.1.</em></p>
+<h3>5.2.2 Proceso propuesto (To-Be)</h3>
+<p><img alt="Figura 2. Proceso To-Be de la Distribuidora La Dorada" src="C:/Users/veran/OneDrive/Desktop/Semestre 6/Desarrollo sistemas empresariales/Proyecto_Final_Distribuidora_La_Dorada/docs/diagramas/to-be-la-dorada.png"></p>
+<p><em>Figura 2. Proceso To-Be (elaboración propia con PlantUML). El color verde marca las mejoras; los códigos M1–M6 corresponden a la tabla de mejoras de este apartado. El canal de recepción por WhatsApp se mantiene: el cambio está en que el pedido pasa a registrarse una sola vez en el sistema, y </em><em>la confirmación es automática al registrarlo</em><em>: si no hay correcciones (el inventario alcanza), el pedido queda </em><em>confirmado</em><em> y bodega lo despacha sin esperar una confirmación manual; si hay faltante, queda <code>pendiente</code> con el motivo. La consolidación de pagos al cierre del día se conserva como actividad de reporte sobre los mismos pedidos (mejora M5), no como paso previo al despacho.</em></p>
+<h3>5.2.3 Mejoras esperadas</h3>
+<table>
+<thead>
+<tr>
+<th>Código</th>
+<th>Mejora esperada</th>
+<th>En el As-Is</th>
+<th>En el To-Be</th>
+<th>Cómo verificarla</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>M1</td>
+<td><strong>Fuente única de información</strong>: un solo registro del pedido</td>
+<td>Dos archivos paralelos (ventas y bodega) con datos del mismo pedido</td>
+<td>Productos, existencias y pedidos viven en la misma base de datos</td>
+<td>El mismo pedido consultado por ventas, bodega y administración muestra idénticos datos</td>
+</tr>
+<tr>
+<td>M2</td>
+<td><strong>Validación de inventario en línea y descuento único</strong></td>
+<td>Confirmación manual, secuencial y sujeta a error; posible doble descuento</td>
+<td>La existencia se verifica <strong>al registrar el pedido</strong>: si alcanza, el pedido queda confirmado automáticamente y se descuenta exactamente una vez, en la misma operación (la confirmación ocurre sola al registrarse el pedido)</td>
+<td>Escenarios T-01 (pedido válido) y T-02 (pedido inválido) del apartado 5.8</td>
+</tr>
+<tr>
+<td>M3</td>
+<td><strong>Rechazo explícito con motivo</strong></td>
+<td>El cliente entera del faltante tarde y por mensaje</td>
+<td>Si no alcanza el inventario, el pedido queda <code>pendiente</code> y se muestra el motivo concreto con las existencias disponibles</td>
+<td>Intentar pedir más de lo disponible devuelve un mensaje y no modifica existencias</td>
+</tr>
+<tr>
+<td>M4</td>
+<td><strong>Estados compartidos y transiciones coherentes</strong></td>
+<td>Cada área informa a su manera; sin vista común</td>
+<td>Pedidos con estados definidos y visibles para todos los actores</td>
+<td>Consultar el estado del mismo pedido desde escritorio y desde teléfono</td>
+</tr>
+<tr>
+<td>M5</td>
+<td><strong>Pagos ligados al pedido</strong></td>
+<td>Consolidado de pagos al cierre, sin vínculo formal</td>
+<td>El resumen de pedidos por estado alimenta la consolidación de pagos</td>
+<td>El total de un pedido coincide con el consolidado del día</td>
+</tr>
+<tr>
+<td>M6</td>
+<td><strong>Visibilidad en tiempo real para la gerencia</strong></td>
+<td>La gerencia se entera por las áreas o por reclamos</td>
+<td>La misma fuente de datos responde estados, pendientes e histórico</td>
+<td>Tablero con pedidos por estado actualizado al recargar</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2>5.3 Requerimientos y alcance</h2>
+<h3>5.3.1 Requerimientos funcionales</h3>
+<table>
+<thead>
+<tr>
+<th>Código</th>
+<th>Requerimiento</th>
+<th>Prioridad MoSCoW</th>
+<th>Criterio de aceptación</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>RF-01</td>
+<td>Consultar productos, precios y existencias</td>
+<td><strong>Must</strong></td>
+<td>Desde el listado se ven referencia/nombre, precio y existencias de cada producto; la consulta funciona tras cerrar y reabrir la aplicación</td>
+</tr>
+<tr>
+<td>RF-02</td>
+<td>Registrar o editar productos</td>
+<td><strong>Must</strong></td>
+<td>Se puede crear un producto y modificar su precio o existencias; el cambio persiste y se refleja en el listado sin recargar la base</td>
+</tr>
+<tr>
+<td>RF-03</td>
+<td>Registrar pedidos con productos y cantidades</td>
+<td><strong>Must</strong></td>
+<td>Un pedido admite varias líneas (producto + cantidad &gt; 0), se guarda con su detalle consultable y, si el inventario alcanza, queda <strong>confirmado automáticamente</strong> en el mismo flujo</td>
+</tr>
+<tr>
+<td>RF-04</td>
+<td>Validar existencias y bloquear la confirmación inválida</td>
+<td><strong>Must</strong></td>
+<td>Si la cantidad supera las existencias, la confirmación se impide <strong>y se muestra el motivo</strong>; las existencias no cambian</td>
+</tr>
+<tr>
+<td>RF-05</td>
+<td>Consultar pedidos y actualizar estados</td>
+<td><strong>Must</strong></td>
+<td>El pedido muestra su estado y solo admite las transiciones definidas (pendiente → confirmado → despachado; rechazado desde pendiente o confirmado)</td>
+</tr>
+<tr>
+<td>RF-06</td>
+<td>Guardar y recuperar registros</td>
+<td><strong>Must</strong></td>
+<td>Cerrando y reabriendo la aplicación, los productos y pedidos registrados siguen disponibles con sus datos</td>
+</tr>
+<tr>
+<td>RF-07</td>
+<td>Resumen de pedidos por estado</td>
+<td><strong>Should</strong></td>
+<td>Pantalla con el conteo de pedidos en cada estado y el valor total asociado, actualizada con los cambios de estado</td>
+</tr>
+<tr>
+<td>RF-08</td>
+<td>Autenticación y permisos diferenciados</td>
+<td><strong>Could</strong></td>
+<td><strong>No implementado en esta versión:</strong> la matriz de la propuesta documental de 5.7.1 queda como diseño para una versión futura con sesión; la web actual es abierta (cualquiera con la dirección consulta y opera todas las acciones)</td>
+</tr>
+<tr>
+<td>RF-09</td>
+<td>Cancelación de un pedido por parte de ventas</td>
+<td><strong>Should</strong></td>
+<td>Un pedido pendiente o confirmado puede cancelarse, pasa a estado rechazado y <strong>no</strong> altera existencias ya descontadas sin un movimiento explícito de reversión</td>
+</tr>
+<tr>
+<td>RF-10</td>
+<td>Búsqueda y filtro de productos por nombre o referencia</td>
+<td><strong>Could</strong></td>
+<td>El catálogo permite localizar un producto escribiendo parte de su nombre o referencia</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Priorización (MoSCoW):</strong> 6 <em>Must</em>, 2 <em>Should</em>, 2 <em>Could</em>. El desarrollo de la Jornada 3 se concentra en los seis <em>Must</em>; <em>Should</em> entra solo si están cubiertos, y <em>Could</em> no compromete la entrega.</p>
+<h3>5.3.2 Requerimientos no funcionales verificables</h3>
+<table>
+<thead>
+<tr>
+<th>Código</th>
+<th>Requerimiento no funcional</th>
+<th>Criterio de verificación (verificable)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>RNF-01</td>
+<td><strong>Responsividad</strong>: la interfaz debe servir en computador y en teléfono</td>
+<td>En las tres pantallas clave (catálogo, registro de pedido, detalle de pedido) no hay scroll horizontal a 360 px de ancho y siguen siendo utilizables a 1280 px</td>
+</tr>
+<tr>
+<td>RNF-02</td>
+<td><strong>Tiempo de respuesta</strong>: la consulta debe ser percibida como inmediata</td>
+<td>Listado de productos y de pedidos carga en menos de 2 segundos con 500 registros de prueba</td>
+</tr>
+<tr>
+<td>RNF-03</td>
+<td><strong>Persistencia de la información</strong></td>
+<td>Tras cerrar y reabrir la aplicación, los registros creados siguen presentes con sus mismos valores (escenario T-03: consulta móvil y persistencia)</td>
+</tr>
+<tr>
+<td>RNF-04</td>
+<td><strong>Integridad del inventario</strong>: no se admiten descuentos duplicados</td>
+<td>Después de confirmar un pedido (T-01: pedido válido) o de reintentarlo, las existencias se han descontado <strong>una sola vez</strong>; en T-02 (pedido inválido) no cambian</td>
+</tr>
+<tr>
+<td>RNF-05</td>
+<td><strong>Consistencia entre dispositivos</strong>: escritorio y móvil usan los mismos datos</td>
+<td>Un pedido registrado en escritorio se consulta desde un teléfono con el mismo estado y detalle</td>
+</tr>
+<tr>
+<td>RNF-06</td>
+<td><strong>Usabilidad básica</strong></td>
+<td>Acciones principales completables en máximo 3 interacciones desde la pantalla inicial y con botones de área táctil ≥ 44 px en la vista móvil</td>
+</tr>
+</tbody>
+</table>
+<h3>5.3.3 Alcance incluido</h3>
+<ul>
+<li>Aplicación <strong>web responsiva</strong> (computador y teléfono desde el navegador).</li>
+<li>Catálogo de productos con consulta, registro y edición.</li>
+<li>Registro de pedidos con una o varias líneas y validación de disponibilidad antes de confirmar.</li>
+<li>Consulta del detalle y del estado de los pedidos, con transiciones coherentes.</li>
+<li>Persistencia de la información entre sesiones.</li>
+<li>Datos ficticios precargados: catálogo de 15 productos de prueba (el sembrado no incluye pedidos de muestra; se crean al probar el sistema).</li>
+</ul>
+<h3>5.3.4 Exclusiones</h3>
+<ul>
+<li>Integración con <strong>WhatsApp</strong> (el canal se usa para recibir pedidos, pero no se conecta a la API).</li>
+<li><strong>Pagos reales</strong>, facturación fiscal, contabilidad y logística avanzada.</li>
+<li>Aplicación <strong>móvil nativa</strong> (opcional en la guía y sin puntos adicionales por sí sola).</li>
+<li><strong>Autenticación y permisos diferenciados</strong> en esta versión: la matriz de roles del apartado 5.7 es <strong>propuesta documental</strong>, no una funcionalidad implementada (RF-08: autenticación y permisos, prioridad Could).</li>
+<li>Multicompañía, catálogo multimoneda, venta al detal con precios por cantidad, notificaciones automáticas y modo sin conexión.</li>
+</ul>
+<h3>5.3.5 Supuestos y dependencias</h3>
+<table>
+<thead>
+<tr>
+<th>Tipo</th>
+<th>Descripción</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Supuesto</td>
+<td>Los datos del caso (100 pedidos, 20 correcciones, 15 retrasos, 40 min) se usan como <strong>línea base didáctica</strong>, no como medición de la empresa real</td>
+</tr>
+<tr>
+<td>Supuesto</td>
+<td>El canal de recepción sigue siendo WhatsApp: el sistema recibe el pedido cuando el vendedor lo digita</td>
+</tr>
+<tr>
+<td>Dependencia</td>
+<td>Disponibilidad de la base de datos y de las credenciales del proyecto para la persistencia</td>
+</tr>
+<tr>
+<td>Riesgo</td>
+<td>Concentrar el trabajo en la interfaz y dejar las reglas de negocio sin implementar (la guía penaliza explícitamente este caso)</td>
+</tr>
+</tbody>
+</table>
+<h3>5.3.6 Reglas de negocio</h3>
+<p>Reglas de la guía que el sistema debe cumplir. Se aplican en los casos de uso, la arquitectura y las pruebas; esta es su tabla definitoria:</p>
+<table>
+<thead>
+<tr>
+<th>Regla</th>
+<th>Dónde se cumple en el sistema</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Rechazo de valores ≤ 0:</strong> cantidades, precios y existencias nunca pueden ser menores o iguales a cero</td>
+<td>Validación en los formularios, <code>CHECK</code> en la base de datos y validación en la RPC <code>crear_pedido()</code></td>
+</tr>
+<tr>
+<td><strong>Bloqueo con motivo:</strong> si no alcanza el inventario, la confirmación se impide y se muestra el motivo con números concretos</td>
+<td>RPC <code>confirmar_pedido()</code> → error <code>INVENTARIO_INSUFICIENTE: … (disponibles X, solicitados Y)</code>; la web la invoca <strong>automáticamente al registrar el pedido</strong> (y también al pulsar «Confirmar») y muestra el motivo amigable</td>
+</tr>
+<tr>
+<td><strong>Descuento único:</strong> las existencias se descuentan exactamente una vez, en una sola transacción</td>
+<td><code>confirmar_pedido()</code> con bloqueo de fila (<code>FOR UPDATE</code>), invocada en el mismo flujo de registro; el reintento recibe <code>TRANSICION_INVALIDA</code>; <code>CHECK (existencias ≥ 0)</code></td>
+</tr>
+<tr>
+<td><strong>Estados coherentes:</strong> <code>pendiente → confirmado → despachado</code>; <code>rechazado</code> es un estado final</td>
+<td><code>CHECK</code> de estados, disparador <code>fn_pedidos_transicion()</code> y transiciones válidas mostradas en la web</td>
+</tr>
+<tr>
+<td><strong>Misma fuente:</strong> escritorio y móvil consultan los mismos registros</td>
+<td>Supabase como única persistencia de productos y pedidos; la web no guarda datos de negocio localmente</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h1>JORNADA 2 · DISEÑO</h1>
+<h2>5.4 Historias y casos de uso</h2>
+<h3>5.4.1 Historias de usuario</h3>
+<p><strong>HU-01 — Vendedor: registrar y confirmar un pedido</strong></p>
+<ul>
+<li><strong>Como</strong> vendedor, <strong>quiero</strong> registrar un pedido con varios productos y cantidades y ver, antes de confirmar, si el inventario alcanza, <strong>para</strong> no prometerle al cliente algo que bodega no puede despachar.</li>
+<li><strong>Valor de negocio:</strong> ataca P3 (15 pedidos retrasados por faltante de existencias) y P5 (entregas prometidas sin confirmación de bodega), y acorta los 40 minutos que hoy toma confirmar la disponibilidad de forma secuencial (P2).</li>
+<li><strong>Criterios de aceptación:</strong>
+  1. El sistema rechaza cantidades menores o iguales a cero <strong>antes</strong> de guardar la línea y lo informa en pantalla (cantidades ≤ 0 rechazadas).
+  2. Al registrar el pedido, si la cantidad supera las existencias, la confirmación queda bloqueada, el pedido sigue <code>pendiente</code> y se muestra el motivo con el inventario disponible (bloqueo con motivo).
+  3. Si el inventario alcanza, el pedido queda en estado <code>confirmado</code> <strong>automáticamente al registrarlo</strong> y las existencias se descuentan <strong>exactamente una vez</strong> (descuento único); bodega puede despacharlo sin espera.</li>
+</ul>
+<p><strong>HU-02 — Encargada de bodega: despachar desde el teléfono</strong></p>
+<ul>
+<li><strong>Como</strong> encargada de bodega, <strong>quiero</strong> ver los pedidos confirmados y marcarlos como despachados desde el teléfono, <strong>para</strong> no depender de mensajes ni de un archivo de existencias aparte.</li>
+<li><strong>Valor de negocio:</strong> elimina P5 (promesas de entrega sin confirmación escrita) y P7 (sin vista compartida del estado): bodega trabaja sobre la misma fuente que ventas y deja registro escrito de la preparación.</li>
+<li><strong>Criterios de aceptación:</strong>
+  1. La lista muestra los pedidos en estado <code>confirmado</code> con su detalle de líneas y cantidades.
+  2. Al marcar el despacho, el estado cambia <strong>una sola vez</strong> y se registra fecha y hora.
+  3. El mismo estado se observa desde el computador sin necesidad de recargar la base (escritorio y móvil consultan los mismos registros).</li>
+</ul>
+<p><strong>HU-03 — Gerente / auxiliar administrativo: resumen y pagos</strong></p>
+<ul>
+<li><strong>Como</strong> gerente y auxiliar administrativo, <strong>quiero</strong> ver el resumen de pedidos por estado con su valor total, <strong>para</strong> consolidar los pagos del día y detectar atrasos sin preguntar a cada área.</li>
+<li><strong>Valor de negocio:</strong> resuelve P6 (pagos consolidados sin vínculo con el pedido) y P7 (falta de vista compartida del estado).</li>
+<li><strong>Criterios de aceptación:</strong>
+  1. El resumen cuenta y suma los pedidos de cada estado (<code>pendiente</code>, <code>confirmado</code>, <code>despachado</code>, <code>rechazado</code>).
+  2. El total del período coincide con la suma de los pedidos que lo componen.
+  3. El resumen se actualiza cuando cambia el estado de un pedido (RF-07: resumen de pedidos por estado).</li>
+</ul>
+<h3>5.4.2 Diagrama general de casos de uso</h3>
+<p><img alt="Figura 3. Diagrama general de casos de uso del sistema" src="C:/Users/veran/OneDrive/Desktop/Semestre 6/Desarrollo sistemas empresariales/Proyecto_Final_Distribuidora_La_Dorada/docs/diagramas/casos-de-uso.png"></p>
+<p><em>Figura 3. Diagrama general de casos de uso (elaboración propia con PlantUML). Es el </em><em>único</em><em> diagrama de casos de uso del documento, como exige la guía. Los casos se relacionan con los códigos RF del apartado 5.3.</em></p>
+<h3>5.4.3 Casos de uso detallados</h3>
+<p>El diagrama general (Figura 3) contiene <strong>ocho casos de uso y todos se detallan aquí con sus flujos</strong>, según la indicación del docente (la guía pide como mínimo dos). El código de cada caso es el mismo en la figura y en este apartado (<code>CU-01</code> … <code>CU-08</code>, de <em>Caso de Uso</em>), y cada caso se describe en una única tabla que reúne sus elementos <strong>y sus flujos</strong>:</p>
+<table>
+<thead>
+<tr>
+<th>Caso de uso</th>
+<th>Nombre</th>
+<th>Actor principal</th>
+<th>Requerimiento asociado</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>CU-01</td>
+<td>Consultar catálogo de productos</td>
+<td>Vendedor, Bodega, Gerente</td>
+<td>RF-01, RF-10</td>
+</tr>
+<tr>
+<td>CU-02</td>
+<td>Registrar o editar productos</td>
+<td>Gerente, Bodega (solo existencias)</td>
+<td>RF-02</td>
+</tr>
+<tr>
+<td>CU-03</td>
+<td>Registrar pedido con productos y cantidades</td>
+<td>Vendedor</td>
+<td>RF-03</td>
+</tr>
+<tr>
+<td>CU-04</td>
+<td>Validar disponibilidad y confirmar pedido</td>
+<td>Vendedor (con el sistema)</td>
+<td>RF-04</td>
+</tr>
+<tr>
+<td>CU-05</td>
+<td>Consultar pedidos y su estado</td>
+<td>Vendedor, Bodega, Gerente</td>
+<td>RF-05</td>
+</tr>
+<tr>
+<td>CU-06</td>
+<td>Actualizar estado del pedido</td>
+<td>Encargada de bodega</td>
+<td>RF-05</td>
+</tr>
+<tr>
+<td>CU-07</td>
+<td>Resumen de pedidos por estado</td>
+<td>Gerente / Auxiliar administrativo</td>
+<td>RF-07</td>
+</tr>
+<tr>
+<td>CU-08</td>
+<td>Cancelar pedido</td>
+<td>Vendedor, Gerente</td>
+<td>RF-09</td>
+</tr>
+</tbody>
+</table>
+<h4>CU-01. Consultar el catálogo de productos</h4>
+<table>
+<thead>
+<tr>
+<th>Elemento</th>
+<th>Descripción</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Código</strong></td>
+<td>CU-01 (RF-01 — consultar productos, precios y existencias; RF-10 — búsqueda por nombre o referencia)</td>
+</tr>
+<tr>
+<td><strong>Actor principal</strong></td>
+<td>Vendedor</td>
+</tr>
+<tr>
+<td><strong>Actores secundarios</strong></td>
+<td>Encargada de bodega, Gerente / Auxiliar administrativo</td>
+</tr>
+<tr>
+<td><strong>Disparador</strong></td>
+<td>Cualquier actor necesita conocer precios o existencias antes de vender, preparar un pedido o revisar inventario</td>
+</tr>
+<tr>
+<td><strong>Precondiciones</strong></td>
+<td>El catálogo contiene al menos un producto activo</td>
+</tr>
+<tr>
+<td><strong>Flujo principal</strong></td>
+<td>1. El actor abre la pantalla de catálogo.<br>2. El sistema lista los productos con referencia, nombre, precio y existencias.<br>3. El actor (opcional) escribe parte del nombre o la referencia para buscar (RF-10).<br>4. El sistema filtra la lista y muestra los coincidentes.<br>5. El actor revisa la información; al salir, el sistema no cambia nada.</td>
+</tr>
+<tr>
+<td><strong>Flujos alternativos</strong></td>
+<td><strong>A1 — Catálogo vacío:</strong> si no hay productos, el sistema muestra «No hay productos registrados» y ofrece registrar uno (CU-02).<br><strong>A2 — Sin coincidencias en la búsqueda:</strong> el sistema informa que ningún producto coincide con lo escrito y limpia el filtro.<br><strong>A3 — Error de carga:</strong> el sistema muestra el error y un botón de reintento; no presenta datos incompletos como si fueran válidos.</td>
+</tr>
+<tr>
+<td><strong>Postcondiciones (éxito)</strong></td>
+<td>El actor ve referencia, nombre, precio y existencias actualizados; no se modifica ningún dato</td>
+</tr>
+<tr>
+<td><strong>Postcondiciones (fallo)</strong></td>
+<td>Se muestra un mensaje de error de carga; la información permanece intacta</td>
+</tr>
+</tbody>
+</table>
+<h4>CU-02. Registrar o editar un producto</h4>
+<table>
+<thead>
+<tr>
+<th>Elemento</th>
+<th>Descripción</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Código</strong></td>
+<td>CU-02 (RF-02 — registrar o editar productos)</td>
+</tr>
+<tr>
+<td><strong>Actor principal</strong></td>
+<td>Gerente (catálogo y precios)</td>
+</tr>
+<tr>
+<td><strong>Actores secundarios</strong></td>
+<td>Encargada de bodega (solo existencias)</td>
+</tr>
+<tr>
+<td><strong>Disparador</strong></td>
+<td>Llega un producto nuevo al catálogo o hay que corregir precio o existencias</td>
+</tr>
+<tr>
+<td><strong>Precondiciones</strong></td>
+<td>El catálogo está disponible (la web no exige inicio de sesión)</td>
+</tr>
+<tr>
+<td><strong>Flujo principal</strong></td>
+<td>1. El actor abre el catálogo y pulsa «Nuevo producto» o selecciona un producto existente.<br>2. Ingresa o corrige: referencia (única), nombre, precio (≥ 0) y existencias (≥ 0).<br>3. El sistema valida formato, unicidad de la referencia y restricciones numéricas.<br>4. El sistema guarda el cambio y lo persiste en el servidor.<br>5. El catálogo se refresca y muestra el dato nuevo; si era una edición, los pedidos en curso conservan el precio congelado de sus líneas.</td>
+</tr>
+<tr>
+<td><strong>Flujos alternativos</strong></td>
+<td><strong>A1 — Referencia duplicada:</strong> el sistema rechaza el guardado y señala el producto que ya usa esa referencia.<br><strong>A2 — Precio o existencias negativos:</strong> el sistema rechaza el valor y muestra la restricción (≥ 0), aplicando la misma regla de valores ≤ 0 usada en cantidades.<br><strong>A3 — Producto con histórico de pedidos:</strong> no se borra; se marca <code>activo = false</code> para ocultarlo del catálogo sin romper los pedidos antiguos (RF-06: los registros se conservan).<br><strong>A4 — Error de persistencia:</strong> el sistema informa que el cambio no se guardó y permite reintentar.</td>
+</tr>
+<tr>
+<td><strong>Postcondiciones (éxito)</strong></td>
+<td>El producto queda guardado o actualizado y aparece con esos datos en el catálogo (CU-01) y en el registro de pedidos (CU-03)</td>
+</tr>
+<tr>
+<td><strong>Postcondiciones (fallo)</strong></td>
+<td>No se guarda nada y se muestra el motivo de la negación</td>
+</tr>
+</tbody>
+</table>
+<h4>CU-03. Registrar un pedido con productos y cantidades</h4>
+<table>
+<thead>
+<tr>
+<th>Elemento</th>
+<th>Descripción</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Código</strong></td>
+<td>CU-03 (RF-03 — registrar pedidos con productos y cantidades)</td>
+</tr>
+<tr>
+<td><strong>Actor principal</strong></td>
+<td>Vendedor</td>
+</tr>
+<tr>
+<td><strong>Actor secundario</strong></td>
+<td>Sistema (validación de líneas)</td>
+</tr>
+<tr>
+<td><strong>Disparador</strong></td>
+<td>El cliente solicita productos por WhatsApp y el vendedor toma el pedido</td>
+</tr>
+<tr>
+<td><strong>Precondiciones</strong></td>
+<td>El catálogo tiene al menos un producto activo; el vendedor conoce producto y cantidad</td>
+</tr>
+<tr>
+<td><strong>Flujo principal</strong></td>
+<td>1. El vendedor crea un pedido e ingresa el nombre del cliente.<br>2. Agrega una o varias líneas: producto y cantidad.<br>3. El sistema valida cada línea: la cantidad debe ser mayor que cero y el producto debe existir y estar activo.<br>4. El sistema consulta y muestra las existencias disponibles de cada producto (solo lectura).<br>5. El sistema calcula el total, asigna el número y registra el pedido; <strong>en el mismo flujo intenta la confirmación automática</strong> (CU-04): si el inventario alcanza, el pedido queda <code>confirmado</code> con el descuento único hecho y <strong>listo para que bodega lo despache</strong>; si no alcanza, queda <code>pendiente</code> y se muestra el motivo del faltante.<br>6. El pedido queda consultable por todos los actores (CU-05).</td>
+</tr>
+<tr>
+<td><strong>Flujos alternativos</strong></td>
+<td><strong>A1 — Cantidad inválida:</strong> el sistema rechaza la línea con cantidad ≤ 0, muestra el mensaje y no la guarda (cantidades ≤ 0 rechazadas).<br><strong>A2 — Producto inexistente o inactivo:</strong> el sistema no permite agregar la línea y sugiere buscar de nuevo en el catálogo (CU-01).<br><strong>A3 — Pedido sin líneas:</strong> el sistema impide guardar un pedido vacío.<br><strong>A4 — Inventario insuficiente:</strong> el pedido se registra <code>pendiente</code> con el motivo (CU-04, flujo alternativo A1); el vendedor corrige con el cliente y reintenta la confirmación, o cancela el pedido (CU-08).<br><strong>A5 — Error de persistencia:</strong> el sistema informa el error; no queda un pedido a medias (todo o nada).</td>
+</tr>
+<tr>
+<td><strong>Postcondiciones (éxito)</strong></td>
+<td>Pedido guardado con número, cliente y una o varias líneas, en uno de dos resultados: <strong><code>confirmado</code></strong> con existencias descontadas una sola vez (caso normal, sin correcciones) o <strong><code>pendiente</code></strong> con el motivo del faltante (las existencias no cambian hasta que se confirme o cancele)</td>
+</tr>
+<tr>
+<td><strong>Postcondiciones (fallo)</strong></td>
+<td>El pedido no se guarda (o no se guarda la línea inválida) y se muestra el motivo</td>
+</tr>
+<tr>
+<td><strong>Nota</strong></td>
+<td>Por la relación <strong><code>&lt;&lt;include&gt;&gt;</code></strong> del diagrama, registrar el pedido incluye siempre la validación de disponibilidad de CU-04: se ejecuta <strong>automáticamente al guardar</strong>; si la validación bloquea, el pedido queda <code>pendiente</code> y CU-04 queda a la espera de la corrección del vendedor.</td>
+</tr>
+</tbody>
+</table>
+<h4>CU-04. Validar la disponibilidad y confirmar el pedido</h4>
+<table>
+<thead>
+<tr>
+<th>Elemento</th>
+<th>Descripción</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Código</strong></td>
+<td>CU-04 (RF-04 — validar existencias y bloquear la confirmación inválida; bloqueo con motivo; descuento único)</td>
+</tr>
+<tr>
+<td><strong>Actor principal</strong></td>
+<td>Vendedor</td>
+</tr>
+<tr>
+<td><strong>Actor secundario</strong></td>
+<td>Sistema (función transaccional del servidor)</td>
+</tr>
+<tr>
+<td><strong>Disparador</strong></td>
+<td><strong>Automático:</strong> el sistema ejecuta la validación al registrar el pedido (CU-04, incluido en CU-03). <strong>Manual:</strong> el vendedor pulsa «Confirmar» sobre un pedido que quedó <code>pendiente</code> (por ejemplo, tras corregir un faltante)</td>
+</tr>
+<tr>
+<td><strong>Precondiciones</strong></td>
+<td>El pedido existe, tiene al menos una línea y está en estado <code>pendiente</code> (los pedidos que nacen sin correcciones pasan por aquí automáticamente al registrarse)</td>
+</tr>
+<tr>
+<td><strong>Flujo principal</strong></td>
+<td>1. Al registrarse el pedido (o al pulsar «Confirmar»), el servidor vuelve a leer las existencias actuales (no confía en lo que cargó la pantalla) y compara contra la suma de cantidades pedidas por producto.<br>2. Si todo el inventario alcanza, el servidor descuenta las existencias y cambia el estado a <code>confirmado</code> <strong>en una sola operación</strong> (descuento único; la confirmación ocurre sola al registrarse el pedido).<br>3. El sistema muestra el pedido confirmado con su fecha y estado.<br>4. El pedido aparece automáticamente en la lista de bodega (todos ven el mismo registro): <strong>bodega lo despacha sin esperar ninguna confirmación adicional</strong>.</td>
+</tr>
+<tr>
+<td><strong>Flujos alternativos</strong></td>
+<td><strong>A1 — Inventario insuficiente:</strong> el servidor <strong>impide</strong> la confirmación y muestra el motivo concreto (por ejemplo: «disponibles 8 jabones, solicitados 12»); el pedido sigue <code>pendiente</code> y las existencias no cambian (bloqueo con motivo). El vendedor ajusta las líneas y reintenta, o cancela el pedido (CU-08).<br><strong>A2 — Cantidad inválida detectada al revalidar:</strong> si una línea quedó con cantidad ≤ 0, la confirmación se bloquea y se señala la línea (cantidades ≤ 0 rechazadas).<br><strong>A3 — Reenvío o doble clic:</strong> la segunda llamada detecta que el pedido ya no está <code>pendiente</code> y <strong>no</strong> descuenta de nuevo (sin descuentos duplicados).<br><strong>A4 — Fallo en la operación:</strong> si la transacción falla a mitad, nada cambia: ni estado ni existencias (RNF-04: integridad del inventario).</td>
+</tr>
+<tr>
+<td><strong>Postcondiciones (éxito)</strong></td>
+<td>Estado <code>confirmado</code>, existencias descontadas <strong>exactamente una vez</strong>, total consolidado y pedido visible para bodega (CU-06)</td>
+</tr>
+<tr>
+<td><strong>Postcondiciones (fallo)</strong></td>
+<td>El pedido sigue <code>pendiente</code>, se muestra el motivo y las existencias <strong>no</strong> cambian</td>
+</tr>
+</tbody>
+</table>
+<h4>CU-05. Consultar los pedidos y su estado</h4>
+<table>
+<thead>
+<tr>
+<th>Elemento</th>
+<th>Descripción</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Código</strong></td>
+<td>CU-05 (RF-05 — consultar pedidos y actualizar estados; RF-06 — guardar y recuperar registros)</td>
+</tr>
+<tr>
+<td><strong>Actor principal</strong></td>
+<td>Vendedor</td>
+</tr>
+<tr>
+<td><strong>Actores secundarios</strong></td>
+<td>Encargada de bodega, Gerente / Auxiliar administrativo</td>
+</tr>
+<tr>
+<td><strong>Disparador</strong></td>
+<td>Alguien necesita saber qué pedidos existen y en qué estado están</td>
+</tr>
+<tr>
+<td><strong>Precondiciones</strong></td>
+<td>Existe al menos un pedido registrado</td>
+</tr>
+<tr>
+<td><strong>Flujo principal</strong></td>
+<td>1. El actor abre la pantalla de pedidos.<br>2. El sistema lista los pedidos con número, cliente, estado y total.<br>3. El actor filtra por estado o busca por número o cliente.<br>4. Selecciona un pedido y el sistema muestra el detalle con sus líneas.<br>5. El actor verifica el estado; al cerrar y reabrir la aplicación, el pedido sigue ahí con los mismos datos (RF-06, RNF-03: persistencia).</td>
+</tr>
+<tr>
+<td><strong>Flujos alternativos</strong></td>
+<td><strong>A1 — Sin pedidos:</strong> el sistema muestra «Aún no hay pedidos» y ofrece crear uno (CU-03).<br><strong>A2 — Búsqueda sin resultados:</strong> el sistema informa que ningún pedido coincide y limpia el filtro.<br><strong>A3 — Error de carga:</strong> se muestra el error con opción de reintento; nunca se presenta una lista vacía como si fuera la respuesta real.<br><strong>A4 — Cancelación desde la consulta (relación <code>&lt;&lt;extend&gt;&gt;</code> del diagrama):</strong> si el pedido está <code>pendiente</code> o <code>confirmado</code>, el actor puede cancelarlo desde el detalle; la ejecución continúa en CU-08.</td>
+</tr>
+<tr>
+<td><strong>Postcondiciones (éxito)</strong></td>
+<td>El actor ve la lista y el detalle (líneas, cantidades, total, estado y fechas) con el mismo contenido en escritorio y en el teléfono</td>
+</tr>
+<tr>
+<td><strong>Postcondiciones (fallo)</strong></td>
+<td>Se muestra un mensaje; no se altera ningún dato</td>
+</tr>
+</tbody>
+</table>
+<h4>CU-06. Actualizar el estado del pedido</h4>
+<table>
+<thead>
+<tr>
+<th>Elemento</th>
+<th>Descripción</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Código</strong></td>
+<td>CU-06 (RF-05 — consultar pedidos y actualizar estados; estados y transiciones coherentes)</td>
+</tr>
+<tr>
+<td><strong>Actor principal</strong></td>
+<td>Encargada de bodega</td>
+</tr>
+<tr>
+<td><strong>Actor secundario</strong></td>
+<td>Sistema (control de transiciones)</td>
+</tr>
+<tr>
+<td><strong>Disparador</strong></td>
+<td>Bodega revisa su lista de pendientes de despacho</td>
+</tr>
+<tr>
+<td><strong>Precondiciones</strong></td>
+<td>Existe al menos un pedido en estado <code>confirmado</code></td>
+</tr>
+<tr>
+<td><strong>Flujo principal</strong></td>
+<td>1. Bodega abre la lista de pedidos filtrando por estado <code>confirmado</code>.<br>2. Selecciona un pedido y revisa su detalle (líneas, cantidades y cliente).<br>3. Marca «Despachar».<br>4. El sistema verifica que la transición <code>confirmado → despachado</code> esté permitida, cambia el estado y registra la fecha y hora (estados y transiciones coherentes).<br>5. El sistema muestra el pedido como <code>despachado</code> y lo retira de la lista de pendientes.<br>6. La misma información queda visible para ventas, administración y gerencia (escritorio y móvil consultan los mismos registros).</td>
+</tr>
+<tr>
+<td><strong>Flujos alternativos</strong></td>
+<td><strong>A1 — Estado no válido:</strong> si el pedido está <code>pendiente</code>, <code>rechazado</code> o ya <code>despachado</code>, el sistema no permite la acción y muestra la transición válida (estados y transiciones coherentes).<br><strong>A2 — Diferencia física de inventario:</strong> si al preparar el pedido bodega detecta un faltante real, <strong>no</strong> modifica el pedido por su cuenta: el pedido vuelve a <code>rechazado</code> o se ajusta con ventas, documentando el motivo (no se aplican descuentos adicionales).<br><strong>A3 — Sin conectividad:</strong> la acción no se registra y el sistema lo informa; el pedido conserva su estado anterior (RNF-05: consistencia entre dispositivos).</td>
+</tr>
+<tr>
+<td><strong>Postcondiciones (éxito)</strong></td>
+<td>Pedido en estado <code>despachado</code> con fecha y hora, visible igual en escritorio y teléfono (misma fuente)</td>
+</tr>
+<tr>
+<td><strong>Postcondiciones (fallo)</strong></td>
+<td>El estado no cambia y el sistema explica por qué</td>
+</tr>
+</tbody>
+</table>
+<h4>CU-07. Ver el resumen de pedidos por estado</h4>
+<table>
+<thead>
+<tr>
+<th>Elemento</th>
+<th>Descripción</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Código</strong></td>
+<td>CU-07 (RF-07 — resumen de pedidos por estado, prioridad Should)</td>
+</tr>
+<tr>
+<td><strong>Actor principal</strong></td>
+<td>Gerente / Auxiliar administrativo</td>
+</tr>
+<tr>
+<td><strong>Actores secundarios</strong></td>
+<td>Vendedor, Encargada de bodega (solo lectura)</td>
+</tr>
+<tr>
+<td><strong>Disparador</strong></td>
+<td>Se necesita saber cuántos pedidos hay en cada estado y cuánto suman, para planificar y consolidar pagos</td>
+</tr>
+<tr>
+<td><strong>Precondiciones</strong></td>
+<td>Ninguna (funciona también con cero pedidos)</td>
+</tr>
+<tr>
+<td><strong>Flujo principal</strong></td>
+<td>1. El actor abre la pantalla de resumen.<br>2. El sistema agrupa los pedidos por estado (<code>pendiente</code>, <code>confirmado</code>, <code>despachado</code>, <code>rechazado</code>) y suma sus totales.<br>3. El sistema presenta el conteo y el valor de cada estado.<br>4. El actor usa la cifra para consolidar los pagos del día o detectar atrasos.<br>5. Al cambiar el estado de un pedido (CU-04 o CU-06), el resumen se actualiza.</td>
+</tr>
+<tr>
+<td><strong>Flujos alternativos</strong></td>
+<td><strong>A1 — Cero pedidos:</strong> el sistema muestra todos los estados en 0 y no presenta error.<br><strong>A2 — Error de consulta:</strong> se informa el fallo y se ofrece reintentar; no se muestran conteos parciales como si fueran definitivos.</td>
+</tr>
+<tr>
+<td><strong>Postcondiciones (éxito)</strong></td>
+<td>Pantalla con conteo y valor total por cada estado, actualizada con los últimos cambios</td>
+</tr>
+<tr>
+<td><strong>Postcondiciones (fallo)</strong></td>
+<td>Se muestra un mensaje de error; no se presentan parciales sin indicarlo</td>
+</tr>
+</tbody>
+</table>
+<h4>CU-08. Cancelar un pedido</h4>
+<table>
+<thead>
+<tr>
+<th>Elemento</th>
+<th>Descripción</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Código</strong></td>
+<td>CU-08 (RF-09 — cancelación de pedidos, prioridad Should; estados y transiciones coherentes)</td>
+</tr>
+<tr>
+<td><strong>Actor principal</strong></td>
+<td>Vendedor</td>
+</tr>
+<tr>
+<td><strong>Actor secundario</strong></td>
+<td>Gerente (también puede cancelar)</td>
+</tr>
+<tr>
+<td><strong>Disparador</strong></td>
+<td>El cliente se retracta o el pedido no puede cumplirse</td>
+</tr>
+<tr>
+<td><strong>Precondiciones</strong></td>
+<td>El pedido está en estado <code>pendiente</code> o <code>confirmado</code></td>
+</tr>
+<tr>
+<td><strong>Flujo principal</strong></td>
+<td>1. El actor abre el pedido y pulsa «Cancelar».<br>2. El sistema pide confirmación y un motivo breve.<br>3. El sistema valida la transición hacia <code>rechazado</code> (estados y transiciones coherentes).<br>4. Si el pedido estaba <code>confirmado</code>, el sistema repone en la misma operación las existencias que descontó (reversión explícita, una sola vez).<br>5. El sistema registra el estado <code>rechazado</code>, el motivo y la fecha; el pedido queda fuera de las listas activas.</td>
+</tr>
+<tr>
+<td><strong>Flujos alternativos</strong></td>
+<td><strong>A1 — Pedido ya despachado:</strong> no se permite cancelar; el sistema sugiere gestionar la devolución fuera del alcance del sistema.<br><strong>A2 — Pedido ya rechazado:</strong> el sistema informa que la cancelación ya se hizo (evita acciones repetidas).<br><strong>A3 — Fallo al reponer existencias:</strong> si la reversión falla, el sistema no cambia el estado y reporta el error, para no quedar un pedido cancelado con inventario descontado (RNF-04: integridad del inventario).</td>
+</tr>
+<tr>
+<td><strong>Postcondiciones (éxito)</strong></td>
+<td>Pedido en estado <code>rechazado</code>; si estaba <code>confirmado</code>, las existencias descontadas se repone <strong>una sola vez</strong> y queda registrado el motivo</td>
+</tr>
+<tr>
+<td><strong>Postcondiciones (fallo)</strong></td>
+<td>El pedido conserva su estado y se muestra por qué no se pudo cancelar</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2>5.5 Arquitectura e integración</h2>
+<h3>5.5.1 Arquitectura elegida y justificación</h3>
+<p><strong>Arquitectura por capas (interfaz, lógica y datos) con el patrón MVC en el lado cliente y servicios gestionados de datos:</strong> una aplicación <strong>Angular</strong> (componentes standalone y signals) como interfaz responsiva, el cliente de <strong>Supabase</strong> como capa de acceso, la <strong>API REST automática (PostgREST)</strong> y <strong>funciones RPC transaccionales</strong> como capa de lógica, y <strong>PostgreSQL</strong> como persistencia única.</p>
+<p><strong>Justificación:</strong></p>
+<ul>
+<li>Angular con TypeScript estricto, estructura por feature y <em>reactive forms</em> encaja con las validaciones de pedido en el cliente; la capa de acceso usa el cliente de Supabase <strong>sin sesión</strong> (RF-08 no implementado: la web es abierta).</li>
+<li>La guía exige persistencia real, una misma fuente para escritorio y móvil, y reglas de negocio verificables: con una sola base de datos, escritorio y móvil consultan los mismos registros por construcción.</li>
+<li>Las reglas críticas de bloqueo con motivo y descuento único se ejecutan en el <strong>servidor</strong>, en una única transacción; así el doble clic o un reenvío no pueden descontar existencias dos veces.</li>
+<li>El equipo dispone de cuatro jornadas: usar servicios gestionados elimina la instalación y operación de un backend propio y concentra el tiempo en las reglas y en la interfaz.</li>
+<li>Escala horizontal innecesaria para el alcance y migración simple si más adelante se requiere un servicio propio.</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>Alternativa descartada</th>
+<th>Motivo</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Solo <code>localStorage</code> / IndexedDB en el navegador</td>
+<td>No cumple la persistencia compartida: escritorio y móvil no verían los mismos registros (violación de la misma fuente en todos los dispositivos)</td>
+</tr>
+<tr>
+<td>Frontend + backend propio (Node/Express o Laravel) + SQLite</td>
+<td>Añade despliegue, mantenimiento y riesgo operativo sin beneficio para el alcance de la primera versión</td>
+</tr>
+<tr>
+<td>Aplicación móvil nativa primero</td>
+<td>La guía la declara opcional y sin puntos adicionales; la web responsiva cubre el teléfono</td>
+</tr>
+</tbody>
+</table>
+<h3>5.5.2 Diagrama de componentes/contenedores</h3>
+<p><img alt="Figura 4. Arquitectura de componentes: interfaz, lógica y datos" src="C:/Users/veran/OneDrive/Desktop/Semestre 6/Desarrollo sistemas empresariales/Proyecto_Final_Distribuidora_La_Dorada/docs/diagramas/arquitectura.png"></p>
+<p><em>Figura 4. Arquitectura de componentes/contenedores (elaboración propia con PlantUML), con las tres capas —interfaz, lógica y datos— y su integración. Es el </em><em>único</em><em> diagrama arquitectónico del documento.</em></p>
+<h3>5.5.3 Tres principios arquitectónicos</h3>
+<ol>
+<li><strong>Una sola fuente de verdad.</strong> Productos, existencias y pedidos viven en la misma base de datos; no existen archivos paralelos que conciliar. Toda interfaz (escritorio o móvil) consulta ese único repositorio.</li>
+<li><strong>Las reglas de negocio críticas se ejecutan cerca de los datos.</strong> La validación de existencias y el descuento único ocurren en una función transaccional del servidor; el navegador solo presenta el resultado, por lo que la integridad no depende del cliente.</li>
+<li><strong>Separación de capas y bajo acoplamiento (MVC).</strong> La vista (Angular) no consulta la base directamente ni decide reglas: pide datos a la capa de lógica y pinta lo que recibe. Cambiar el diseño de una pantalla no toca las reglas de negocio, y la misma API atiende a todas las interfaces.</li>
+</ol>
+<h3>5.5.4 Cómo interactúan productos, pedidos e inventario</h3>
+<p><em>(Apartado exigido expresamente por la guía para esta sección.)</em></p>
+<p>En este sistema <strong>el inventario no es un módulo separado: es la columna <code>existencias</code> de la entidad <code>producto</code></strong>, y un pedido es la agregación de líneas que referencian esos productos. La interacción ocurre en seis operaciones:</p>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Operación</th>
+<th>Requerimiento</th>
+<th>Lecturas / escrituras</th>
+<th>Efecto sobre productos, pedidos e inventario</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Consultar catálogo</td>
+<td>RF-01 (consultar productos, precios y existencias)</td>
+<td>Lectura de <code>productos</code></td>
+<td>La pantalla de catálogo muestra precio y existencias actuales, ya que el inventario vive en la misma tabla</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Registrar pedido</td>
+<td>RF-03 (registrar pedidos con productos y cantidades)</td>
+<td>Escritura en <code>pedidos</code> + <code>pedido_items</code></td>
+<td>Cada línea guarda <code>producto_id</code> y <code>precio_unitario</code> (copia del precio al momento de registrar); el pedido se registra <code>pendiente</code> y <strong>en el mismo flujo se intenta su confirmación automática</strong>: si el inventario alcanza, <code>confirmar_pedido()</code> lo deja <code>confirmado</code> con el descuento único; si no, permanece <code>pendiente</code> con el motivo</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Confirmar pedido</td>
+<td>RF-04 (validar existencias y bloquear la confirmación inválida)</td>
+<td>Lectura de <code>productos</code> + escritura atómica</td>
+<td>La función del servidor compara la suma de cantidades pedidas contra <code>existencias</code>; si falta inventario rechaza con motivo (bloqueo con motivo); si alcanza, descuenta y pone <code>confirmado</code> en <strong>una sola transacción</strong> (descuento único)</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Despachar pedido</td>
+<td>RF-05 (consultar pedidos y actualizar estados)</td>
+<td>Escritura en <code>pedidos</code></td>
+<td>Cambia <code>confirmado → despachado</code>; <strong>no</strong> vuelve a descontar existencias, porque el descuento ya ocurrió en el paso 3</td>
+</tr>
+<tr>
+<td>5</td>
+<td>Editar productos o ajustar inventario</td>
+<td>RF-02 (registrar o editar productos)</td>
+<td>Escritura en <code>productos</code></td>
+<td>El gerente corrige precio o catálogo y bodega ajusta existencias físicas; el catálogo y la validación de pedidos reflejan el cambio de inmediato (misma fuente)</td>
+</tr>
+<tr>
+<td>6</td>
+<td>Resumen por estado</td>
+<td>RF-07 (resumen de pedidos por estado)</td>
+<td>Lectura agregada de <code>pedidos</code></td>
+<td>Agrupa y suma por <code>estado</code>; inventario no interviene, pero los totales provienen de los mismos pedidos que descuentan existencias</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Regla de coherencia:</strong> solo la operación 3 modifica <code>existencias</code>, y lo hace exactamente una vez por pedido confirmado. Toda el resto del sistema (catálogo, validación, resumen) lee esas mismas cifras.</p>
+<hr>
+<h2>5.6 Modelo de datos</h2>
+<h3>5.6.1 Diagrama entidad-relación</h3>
+<p><img alt="Figura 5. Diagrama entidad-relación del sistema" src="C:/Users/veran/OneDrive/Desktop/Semestre 6/Desarrollo sistemas empresariales/Proyecto_Final_Distribuidora_La_Dorada/docs/diagramas/entidad-relacion.png"></p>
+<p><em>Figura 5. Diagrama entidad-relación (elaboración propia con PlantUML). Es el </em><em>único</em><em> diagrama entidad-relación del documento, con entidades, atributos clave y cardinalidades.</em></p>
+<h3>5.6.2 Entidades y atributos clave</h3>
+<table>
+<thead>
+<tr>
+<th>Entidad</th>
+<th>Atributo clave</th>
+<th>Tipo y restricción</th>
+<th>Función</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>productos</strong></td>
+<td><code>id</code></td>
+<td>UUID, clave primaria</td>
+<td>Identificador único</td>
+</tr>
+<tr>
+<td></td>
+<td><code>referencia</code></td>
+<td>VARCHAR, <strong>única</strong></td>
+<td>Código del producto para la búsqueda (RF-01: consultar productos)</td>
+</tr>
+<tr>
+<td></td>
+<td><code>nombre</code>, <code>precio</code></td>
+<td>VARCHAR / NUMERIC ≥ 0</td>
+<td>Datos de catálogo (RF-01: consultar productos; RF-02: editar productos)</td>
+</tr>
+<tr>
+<td></td>
+<td><code>existencias</code></td>
+<td>INTEGER ≥ 0</td>
+<td><strong>Inventario disponible</strong>; sólo lo modifica la confirmación de pedidos y los ajustes de bodega</td>
+</tr>
+<tr>
+<td></td>
+<td><code>activo</code></td>
+<td>BOOLEAN</td>
+<td>Permite ocultar productos sin borrar su histórico</td>
+</tr>
+<tr>
+<td><strong>pedidos</strong></td>
+<td><code>id</code></td>
+<td>UUID, clave primaria</td>
+<td>Identificador único</td>
+</tr>
+<tr>
+<td></td>
+<td><code>numero</code></td>
+<td>TEXTO con formato <code>PED-AAAA-NNNN</code>, <strong>único</strong></td>
+<td>Número visible para el usuario</td>
+</tr>
+<tr>
+<td></td>
+<td><code>cliente</code></td>
+<td>VARCHAR</td>
+<td>Quien solicita el pedido (canal WhatsApp)</td>
+</tr>
+<tr>
+<td></td>
+<td><code>estado</code></td>
+<td>VARCHAR con <code>CHECK</code> en pendiente/confirmado/despachado/rechazado</td>
+<td>Máquina de estados (estados y transiciones coherentes)</td>
+</tr>
+<tr>
+<td></td>
+<td><code>total</code>, <code>observacion</code>, <code>motivo_rechazo</code></td>
+<td>NUMERIC / TEXT / TEXT</td>
+<td>Resumen por estado (RF-07) y motivo al rechazarlo</td>
+</tr>
+<tr>
+<td></td>
+<td><code>creado_en</code>, <code>confirmado_en</code>, <code>despachado_en</code>, <code>rechazado_en</code>, <code>actualizado_en</code></td>
+<td>TIMESTAMP</td>
+<td>Trazabilidad de cada transición (estados coherentes) y de las métricas M-1</td>
+</tr>
+<tr>
+<td><strong>pedido_items</strong></td>
+<td><code>id</code></td>
+<td>UUID, clave primaria</td>
+<td>Identificador de la línea</td>
+</tr>
+<tr>
+<td></td>
+<td><code>pedido_id</code></td>
+<td>UUID, <strong>clave foránea</strong> → pedidos</td>
+<td>Relación 1:N con el pedido</td>
+</tr>
+<tr>
+<td></td>
+<td><code>producto_id</code></td>
+<td>UUID, <strong>clave foránea</strong> → productos</td>
+<td>Relación 1:N con el producto (N:M entre productos y pedidos)</td>
+</tr>
+<tr>
+<td></td>
+<td><code>cantidad</code></td>
+<td>INTEGER <strong>&gt; 0</strong></td>
+<td>Cantidades ≤ 0 rechazadas, verificada también en la base de datos</td>
+</tr>
+<tr>
+<td></td>
+<td><code>precio_unitario</code></td>
+<td>NUMERIC</td>
+<td>Precio congelado al registrar la línea</td>
+</tr>
+</tbody>
+</table>
+<h3>5.6.3 Cardinalidades</h3>
+<ul>
+<li><code>pedidos</code> <strong>1 — N</strong> <code>pedido_items</code>: un pedido tiene una o varias líneas; una línea pertenece a un solo pedido (borrado en cascada).</li>
+<li><code>productos</code> <strong>1 — N</strong> <code>pedido_items</code>: un producto puede aparecer en muchas líneas de muchos pedidos; una línea referencia un solo producto.</li>
+<li>Entre <code>productos</code> y <code>pedidos</code> la relación es <strong>N:M</strong> y se resuelve a través de <code>pedido_items</code>.</li>
+</ul>
+<h3>5.6.4 Correspondencia con la persistencia implementada</h3>
+<table>
+<thead>
+<tr>
+<th>Entidad / control</th>
+<th>Objeto desplegado</th>
+<th>Detalle real</th>
+<th>Estado</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>productos</td>
+<td>tabla <code>productos</code></td>
+<td><code>id, referencia (única), nombre, precio ≥ 0, existencias ≥ 0, activo, creado_en, actualizado_en</code></td>
+<td>✅ Desplegada (15 productos de prueba)</td>
+</tr>
+<tr>
+<td>pedidos</td>
+<td>tabla <code>pedidos</code></td>
+<td><code>id, numero (PED-AAAA-NNNN), cliente, observacion, estado, total, motivo_rechazo, creado_en, confirmado_en, despachado_en, rechazado_en, actualizado_en</code></td>
+<td>✅ Desplegada</td>
+</tr>
+<tr>
+<td>pedido_items</td>
+<td>tabla <code>pedido_items</code></td>
+<td><code>id, pedido_id, producto_id, cantidad &gt; 0, precio_unitario ≥ 0</code> + claves foráneas con borrado en cascada</td>
+<td>✅ Desplegada</td>
+</tr>
+<tr>
+<td>Restricciones</td>
+<td><code>CHECK</code>, <code>UNIQUE</code>, claves foráneas y disparadores</td>
+<td>cantidades &gt; 0, precios y existencias ≥ 0, estados válidos; disparadores <code>fn_pedidos_transicion()</code> y <code>fn_actualizar_en()</code></td>
+<td>✅ Activas</td>
+</tr>
+<tr>
+<td>Lógica de negocio</td>
+<td>RPC <code>crear_pedido()</code>, <code>confirmar_pedido()</code>, <code>despachar_pedido()</code>, <code>cancelar_pedido()</code>, <code>resumen_por_estado()</code></td>
+<td>funciones transaccionales (<code>security definer</code>) con bloqueo de fila y errores tipados (<code>INVENTARIO_INSUFICIENTE</code>, <code>TRANSICION_INVALIDA</code>, <code>MOTIVO_REQUERIDO</code>, …); la web invoca <code>crear_pedido()</code> y seguidamente <code>confirmar_pedido()</code> (<strong>confirmación automática al registrar</strong>, flujo To-Be de 5.2)</td>
+<td>✅ Desplegadas</td>
+</tr>
+<tr>
+<td>Bitácora interna (mecanismo técnico, sin interfaz)</td>
+<td>tabla <code>auditoria</code> + disparadores</td>
+<td>registro automático de cada escritura con valores anteriores y posteriores; soporta las métricas de 5.9</td>
+<td>✅ Activa</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>Nota de honestidad (requerida por la guía):</strong> esta tabla refleja el sistema <strong>realmente desplegado</strong> en Supabase; la verificación funcional está en 5.8 y el balance en 5.10.</p>
+</blockquote>
+<hr>
+<h1>JORNADA 3 · CONSTRUCCIÓN</h1>
+<h2>5.7 Seguridad y roles</h2>
+<h3>5.7.1 Matriz de permisos propuesta</h3>
+<p>La autenticación por roles <strong>no es obligatoria</strong> en esta versión (RF-08: autenticación y permisos, prioridad <strong>Could</strong>, <strong>no implementado</strong>). La siguiente matriz es una <strong>propuesta documental</strong> de cómo deberían repartirse los permisos en una implantación futura con sesión; la web desplegada es <strong>abierta</strong> (no pide usuario ni contraseña y todas las acciones están disponibles para quien la consulte). La matriz se conserva en el documento porque es la base de la discusión de riesgos (R-2) y de la mejora futura de 5.10.4.</p>
+<table>
+<thead>
+<tr>
+<th>Acción sobre el sistema</th>
+<th style="text-align: center;">Administrador (gerente)</th>
+<th style="text-align: center;">Vendedor</th>
+<th style="text-align: center;">Bodega</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Consultar catálogo de productos (RF-01)</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;">✓</td>
+</tr>
+<tr>
+<td>Registrar o editar productos y existencias (RF-02)</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;">✗</td>
+<td style="text-align: center;">✓ (solo existencias)</td>
+</tr>
+<tr>
+<td>Registrar pedidos (RF-03)</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;">✗</td>
+</tr>
+<tr>
+<td>Confirmar pedidos y validar inventario (RF-04)</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;">✗</td>
+</tr>
+<tr>
+<td>Consultar pedidos y estados (RF-05)</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;">✓</td>
+</tr>
+<tr>
+<td>Despachar pedidos (cambiar a <code>despachado</code>)</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;">✗</td>
+<td style="text-align: center;">✓</td>
+</tr>
+<tr>
+<td>Cancelar o rechazar pedidos (RF-09)</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;">✗</td>
+</tr>
+<tr>
+<td>Ver resumen de pedidos por estado (RF-07)</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;">✓ (solo lectura)</td>
+<td style="text-align: center;">✓ (solo lectura)</td>
+</tr>
+<tr>
+<td>Gestionar usuarios y permisos</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;">✗</td>
+<td style="text-align: center;">✗</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>Esta matriz <strong>no está aplicada</strong> en ninguna capa del sistema desplegado (ni menú, ni rutas, ni base de datos); en la versión actual todas las filas de la tabla quedan <strong>abiertas a cualquier visitante</strong>.</p>
+</blockquote>
+<h3>5.7.2 Tres riesgos y medidas de prevención</h3>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Riesgo</th>
+<th>Consecuencia posible</th>
+<th>Medida de prevención</th>
+<th>Estado del control</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>R-1</td>
+<td><strong>Doble descuento de existencias</strong> por doble clic, reenvío del formulario o dos personas confirmando el mismo pedido</td>
+<td>Inventario en negativo o desactualizado; incumplimiento del descuento único</td>
+<td>Confirmación ejecutada <strong>una sola vez</strong> en una función transaccional del servidor que valida y descuenta en la misma operación; restricción <code>CHECK (existencias &gt;= 0)</code> en la base de datos; bloqueo del botón durante el envío</td>
+<td>✅ Implementado y verificado: <code>confirmar_pedido()</code> con bloqueo de fila, botón bloqueado durante el envío; T-01 en 5.8 (60 → 55, un solo descuento)</td>
+</tr>
+<tr>
+<td>R-2</td>
+<td><strong>Acceso no autorizado a los datos y acciones fuera de rol</strong> (cualquiera con la URL podría editar productos o estados)</td>
+<td>Alteración de precios, existencias o estados de pedidos</td>
+<td><strong>Propuesto:</strong> autenticación por roles con la matriz de 5.7.1 y permisos a nivel de base de datos (RLS + disparadores de columna). <strong>Inmediato:</strong> usar datos ficticios, no exponer información real</td>
+<td>🟡 Propuesto documental (RF-08: autenticación y permisos, prioridad Could); <strong>no implementado</strong> en esta versión — la web es abierta</td>
+</tr>
+<tr>
+<td>R-3</td>
+<td><strong>Pérdida o corrupción de datos</strong> por ediciones simultáneas o fallo del servicio</td>
+<td>Pedidos inconsistentes, imposibilidad de reconstruir el histórico</td>
+<td>Campos <code>creado_en</code>/<code>actualizado_en</code>, revalidación de existencias <strong>al momento de confirmar</strong> (no se confía en lo cargado al abrir la pantalla) y respaldo automático de la base de datos del proveedor</td>
+<td>✅ Revalidación implementada (la RPC relee las existencias al confirmar); respaldo: sin restauración probada (fuera del alcance)</td>
+</tr>
+</tbody>
+</table>
+<h3>5.7.3 Controles implementados vs. propuestos</h3>
+<table>
+<thead>
+<tr>
+<th>Controles <strong>implementados</strong> en esta versión</th>
+<th>Controles <strong>propuestos</strong> (no implementados)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Validación de cantidades ≤ 0 en formulario <strong>y</strong> en la base de datos</td>
+<td><strong>Autenticación con sesión y rol por usuario (RF-08)</strong></td>
+</tr>
+<tr>
+<td>Bloqueo de la confirmación con inventario insuficiente, con motivo visible</td>
+<td><strong>Menú, botones y rutas filtrados por rol, según la matriz de 5.7.1</strong></td>
+</tr>
+<tr>
+<td>Descuento único de existencias en transacción única</td>
+<td><strong>Autorización por fila (RLS) y permisos de columna por disparador</strong></td>
+</tr>
+<tr>
+<td>Máquina de estados con transiciones validadas en servidor (estados coherentes)</td>
+<td>Alertas de inventario mínimo y notificación al cliente</td>
+</tr>
+<tr>
+<td>Persistencia en servidor, misma fuente para escritorio y móvil</td>
+<td>Copias de respaldo programadas y restauración probada</td>
+</tr>
+<tr>
+<td>Bitácora/auditoría de cambios (mecanismo técnico, sin interfaz)</td>
+<td>Integración con la API de WhatsApp para avisos automáticos</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>Nota de honestidad:</strong> la columna izquierda está construida y se verifica en el apartado 5.8; la columna derecha queda explícitamente fuera del alcance de esta versión (autenticación: prioridad Could, ver exclusiones de 5.3.4).</p>
+</blockquote>
+<hr>
+<h1>JORNADA 4 · VALIDACIÓN Y ENTREGA</h1>
+<h2>5.8 Pruebas funcionales</h2>
+<p>La matriz siguiente es la <strong>única</strong> evidencia de pruebas del documento; usa los tres escenarios obligatorios de la guía (sección 8) y no se repite en ningún otro apartado. T-01 y T-02 se ejecutaron contra el proyecto desplegado <strong>por API y además en el navegador sin inicio de sesión</strong> (verificación end-to-end con Chrome DevTools, 09/11/2026); en la versión actual la confirmación ocurre <strong>automáticamente al registrar el pedido</strong> cuando el inventario alcanza, y los escenarios también se repitieron con ese flujo. La sustentación puede repetirlos en vivo. T-03 se completa con el navegador del teléfono.</p>
+<table>
+<thead>
+<tr>
+<th>Prueba</th>
+<th>Escenario (guía §8)</th>
+<th>Entradas</th>
+<th>Pasos</th>
+<th>Resultado esperado</th>
+<th>Resultado obtenido</th>
+<th>Evidencia</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>T-01</strong></td>
+<td>Pedido válido</td>
+<td>60 detergentes (DET-001) en existencias; pedido de <strong>5</strong> detergentes</td>
+<td>1. Abrir la app. 2. Registrar el pedido de 5 detergentes (el sistema intenta la confirmación automática). 3. Leer el estado final y consultar el catálogo y el detalle. 4. Intentar confirmar de nuevo (reintento)</td>
+<td>El pedido queda <code>confirmado</code>; las existencias de detergente pasan de <strong>60 a 55</strong> y se descontaron <strong>una sola vez</strong></td>
+<td>✅ Ejecutado (09/11/2026): <strong>por API</strong>, <code>PED-2026-0005</code> quedó <code>confirmado</code>, existencias <strong>60 → 55</strong> y la segunda confirmación fue rechazada con <code>TRANSICION_INVALIDA</code> (sin doble descuento); <strong>en navegador sin sesión con confirmación automática</strong>, <code>PED-2026-0009</code> nació directamente <code>confirmado</code> al registrarlo (CER-001 <strong>32 → 31</strong>, un solo descuento) y quedó visible para despacho</td>
+<td>API y verificación end-to-end en navegador (Chrome DevTools) sobre el proyecto desplegado; capturas de pantalla pendientes para la sustentación</td>
+</tr>
+<tr>
+<td><strong>T-02</strong></td>
+<td>Pedido inválido</td>
+<td>120 jabones (JAB-001) en existencias; pedido de <strong>130</strong> jabones</td>
+<td>1. Registrar el pedido de 130 jabones (la confirmación automática se intenta al registrar). 2. Leer el mensaje mostrado. 3. Consultar el catálogo. 4. Si se desea, pulsar «Confirmar» para reintentar</td>
+<td>La confirmación se <strong>impide</strong> y se muestra el motivo (disponibles 120, solicitados 130); las existencias de jabón <strong>siguen en 120</strong></td>
+<td>✅ Ejecutado (09/11/2026): <strong>por API</strong>, error <code>INVENTARIO_INSUFICIENTE: Jabon en barra 125 g (disponibles 120, solicitados 130)</code> con existencias intactas; <strong>en navegador sin sesión</strong>, al registrar <code>PED-2026-0010</code> (999 PAN-001 con 25 disponibles) quedó <code>pendiente</code> con el motivo «Pan rebanado 500 g (disponibles 25, solicitados 999)», el reintento mostró el mismo bloqueo y las existencias siguieron en 25</td>
+<td>API y verificación end-to-end en navegador (Chrome DevTools) sobre el proyecto desplegado; captura del mensaje de bloqueo pendiente para la sustentación</td>
+</tr>
+<tr>
+<td><strong>T-03</strong></td>
+<td>Consulta móvil y persistencia</td>
+<td>Un pedido ya registrado; navegador del teléfono o emulador</td>
+<td>1. Registrar un pedido desde el computador. 2. Abrir la app desde el teléfono/emulador y buscar el pedido. 3. Cerrar y reabrir la aplicación. 4. Volver a consultar el pedido y el catálogo</td>
+<td>El pedido aparece desde el móvil con <strong>el mismo estado y detalle</strong>, y <strong>persiste</strong> tras cerrar y reabrir</td>
+<td>🟡 Parcial: la persistencia está verificada por API (una sesión nueva consulta el pedido con el mismo estado y detalle) y la aplicación se recorrió completa en navegador de escritorio sin sesión (catálogo, pedidos, detalle, resumen y bodega); falta la evidencia en navegador móvil</td>
+<td>Pendiente: captura del teléfono y tras reabrir la app</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Criterio de aprobación de la matriz:</strong> los tres resultados obtenidos coinciden con los esperados; cualquier desviación se documenta en el apartado 5.10 como limitación, sin crear un informe de pruebas adicional.</p>
+<h2>5.9 Métricas de éxito</h2>
+<p>Tres indicadores para evaluar el sistema en uso. El sistema ya registra las marcas de tiempo y la bitácora necesarias para medirlos; mientras no haya operación real, se mantienen como metas hipotéticas sobre la línea base didáctica.</p>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Indicador</th>
+<th>Definición</th>
+<th>Cómo medirlo</th>
+<th>Línea base didáctica (caso)</th>
+<th>Meta hipotética</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>M-1</td>
+<td><strong>Tiempo de confirmación de disponibilidad</strong></td>
+<td>Tiempo desde que el vendedor inicia un pedido hasta que queda confirmado o rechazado por inventario</td>
+<td>Marcas de tiempo del sistema (<code>creado_en</code> → <code>actualizado_en</code> al cambiar de estado), promedio por semana</td>
+<td>40 minutos en promedio (consulta secuencial manual)</td>
+<td>Menor a <strong>2 minutos</strong> en promedio</td>
+</tr>
+<tr>
+<td>M-2</td>
+<td><strong>Pedidos con corrección previa</strong></td>
+<td>Porcentaje de pedidos que tuvieron al menos una línea modificada antes de confirmarse</td>
+<td>Conteo de pedidos con ajustes o rechazos motivados ÷ total de pedidos registrados, por semana</td>
+<td>20 de 100 pedidos (<strong>20 %</strong>)</td>
+<td>Menor a <strong>10 %</strong></td>
+</tr>
+<tr>
+<td>M-3</td>
+<td><strong>Pedidos retrasados por falta de existencias</strong></td>
+<td>Porcentaje de pedidos cuya confirmación se bloqueó o se demoró por inventario insuficiente</td>
+<td>Conteo de motivos de bloqueo registrado por el sistema ÷ total de pedidos, por semana</td>
+<td>15 de 100 pedidos (<strong>15 %</strong>)</td>
+<td>Menor a <strong>5 %</strong></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Cómo se usarían:</strong> la línea base proviene de los datos didácticos del caso; al implantar el sistema se mide una semana equivalente y se compara contra la meta. Un cuarto indicador de apoyo posible es la <strong>disponibilidad del inventario en tiempo real</strong> (existencias contadas vs. existencias del sistema), asociado al riesgo R-1 (doble descuento de existencias).</p>
+<h2>5.10 Balance final</h2>
+<blockquote>
+<p><strong>Estado del apartado:</strong> balance actualizado al cierre de la construcción y la verificación end-to-end en navegador (09/11/2026): el sistema está construido, probado, verificado sin sesión y documentado; lo que queda pendiente se lista en 5.10.2.</p>
+</blockquote>
+<h3>5.10.1 Qué se implementó</h3>
+<table>
+<thead>
+<tr>
+<th>Componente</th>
+<th>Estado</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Documento técnico con los diez apartados</td>
+<td>✅ Completo y sincronizado con el sistema (v3.3, web abierta sin inicio de sesión)</td>
+</tr>
+<tr>
+<td>Diagramas: As-Is, To-Be, casos de uso, arquitectura y entidad-relación</td>
+<td>✅ Elaborados y verificados contra el esquema desplegado</td>
+</tr>
+<tr>
+<td>Aplicación web responsiva en Angular</td>
+<td>✅ Catálogo con búsqueda, pedidos con líneas dinámicas, detalle con transiciones y resumen (web abierta, sin inicio de sesión)</td>
+</tr>
+<tr>
+<td>Las cinco reglas de negocio de la guía, ejecutables</td>
+<td>✅ En la base (RPC + disparadores + <code>CHECK</code>) y reflejadas en la interfaz</td>
+</tr>
+<tr>
+<td>Persistencia y datos ficticios de prueba</td>
+<td>✅ Supabase con 15 productos de prueba</td>
+</tr>
+<tr>
+<td>Verificación end-to-end en navegador sin sesión</td>
+<td>✅ Catálogo con búsqueda, creación de pedido con <strong>confirmación automática</strong> (o bloqueo con motivo si falta inventario), despacho, cancelación con motivo, creación/edición de producto, resumen y bodega (Chrome DevTools, 09/11/2026)</td>
+</tr>
+<tr>
+<td>Ejecución de T-01, T-02 y T-03 con evidencia</td>
+<td>🟡 T-01 y T-02 ejecutadas por API y verificadas en navegador (5.8); T-03 pendiente de evidencia móvil</td>
+</tr>
+</tbody>
+</table>
+<h3>5.10.2 Qué quedó pendiente</h3>
+<ul>
+<li>Evidencia en navegador móvil de T-03 y capturas de pantalla de T-01 y T-02 para la sustentación.</li>
+<li><strong>RF-08 (autenticación y permisos diferenciados, Could): no implementado</strong> en esta versión; su matriz queda documentada como propuesta en 5.7.1.</li>
+<li>Los demás controles de la columna derecha del apartado 5.7.3 (alertas de inventario mínimo, notificaciones al cliente, respaldos con restauración probada, integración con la API de WhatsApp).</li>
+<li>Publicación de la aplicación para acceso fuera del aula (si el tiempo lo permite).</li>
+</ul>
+<h3>5.10.3 Limitaciones</h3>
+<ul>
+<li>Los datos del caso (100 pedidos, 20 % de correcciones, 15 % de retrasos, 40 minutos) son <strong>didácticos</strong>; las métricas de 5.9 son metas hipotéticas, no resultados medidos.</li>
+<li>La web es <strong>abierta</strong>: no distingue usuarios ni exige sesión; cualquiera con la dirección puede consultar y operar. Es la consecuencia documental de no implementar RF-08 (prioridad Could) y queda mitigada con datos ficticios sin información real.</li>
+<li>La integración con WhatsApp queda limitada a recibir el pedido de forma manual; no hay notificaciones automáticas al cliente.</li>
+</ul>
+<h3>5.10.4 Mejora futura priorizada</h3>
+<p><strong>Autenticación por roles (RF-08) y, en segundo lugar, alertas de inventario mínimo.</strong> Con las cinco reglas de negocio y la bitácora técnica ya implementadas, la mejora con mejor relación impacto-esfuerzo es implementar la sesión con roles de la matriz propuesta de 5.7 (cierre del riesgo R-2), y sobre esa base añadir avisos al vendedor cuando un producto baja del mínimo y la confirmación del pedido por WhatsApp, apoyándose en las marcas de tiempo y la bitácora de 5.6.4 para medir las métricas M-2 y M-3 sin depender de registros manuales.</p>
+</body>
+</html>
