@@ -795,7 +795,7 @@ hr { border: none; border-top: 1px solid #bbb; margin: 14pt 0; }
 <td>RF-09</td>
 <td>Cancelación de un pedido por parte de ventas</td>
 <td><strong>Should</strong></td>
-<td>Un pedido pendiente o confirmado puede cancelarse, pasa a estado rechazado y <strong>no</strong> altera existencias ya descontadas sin un movimiento explícito de reversión</td>
+<td>Un pedido pendiente o confirmado puede cancelarse con motivo; pasa a estado <code>rechazado</code> y, si estaba <code>confirmado</code>, las existencias descontadas se reponen <strong>una sola vez</strong> en la misma operación (reversión explícita)</td>
 </tr>
 <tr>
 <td>RF-10</td>
@@ -1055,7 +1055,7 @@ hr { border: none; border-top: 1px solid #bbb; margin: 14pt 0; }
 </tr>
 <tr>
 <td><strong>Flujos alternativos</strong></td>
-<td><strong>A1 — Catálogo vacío:</strong> si no hay productos, el sistema muestra «No hay productos registrados» y ofrece registrar uno (CU-02).<br><strong>A2 — Sin coincidencias en la búsqueda:</strong> el sistema informa que ningún producto coincide con lo escrito y limpia el filtro.<br><strong>A3 — Error de carga:</strong> el sistema muestra el error y un botón de reintento; no presenta datos incompletos como si fueran válidos.</td>
+<td><strong>A1 — Catálogo vacío:</strong> si no hay productos, el sistema muestra «No hay productos registrados en el sistema.» y la pantalla ofrece el botón «Nuevo Producto» (CU-02).<br><strong>A2 — Sin coincidencias en la búsqueda:</strong> el sistema muestra «No hay coincidencias para la búsqueda.» y ofrece un botón para limpiar la búsqueda.<br><strong>A3 — Error de carga:</strong> el sistema muestra el error y un botón de reintento; no presenta datos incompletos como si fueran válidos.</td>
 </tr>
 <tr>
 <td><strong>Postcondiciones (éxito)</strong></td>
@@ -1102,7 +1102,7 @@ hr { border: none; border-top: 1px solid #bbb; margin: 14pt 0; }
 </tr>
 <tr>
 <td><strong>Flujos alternativos</strong></td>
-<td><strong>A1 — Referencia duplicada:</strong> el sistema rechaza el guardado y señala el producto que ya usa esa referencia.<br><strong>A2 — Precio o existencias negativos:</strong> el sistema rechaza el valor y muestra la restricción (≥ 0), aplicando la misma regla de valores ≤ 0 usada en cantidades.<br><strong>A3 — Producto con histórico de pedidos:</strong> no se borra; se marca <code>activo = false</code> para ocultarlo del catálogo sin romper los pedidos antiguos (RF-06: los registros se conservan).<br><strong>A4 — Error de persistencia:</strong> el sistema informa que el cambio no se guardó y permite reintentar.</td>
+<td><strong>A1 — Referencia duplicada:</strong> el sistema rechaza el guardado y señala el producto que ya usa esa referencia.<br><strong>A2 — Precio o existencias negativos:</strong> el sistema rechaza el valor y muestra la restricción (≥ 0), aplicando la misma regla de valores ≤ 0 usada en cantidades.<br><strong>A3 — Producto con histórico de pedidos:</strong> no se borra; se marca <code>activo = false</code>: aparece como <strong>Inactivo</strong> en el catálogo (y puede filtrarse fuera con «Solo activos para venta»), no se ofrece en los nuevos pedidos y los pedidos antiguos se conservan (RF-06: los registros se conservan).<br><strong>A4 — Error de persistencia:</strong> el sistema informa que el cambio no se guardó y permite reintentar.</td>
 </tr>
 <tr>
 <td><strong>Postcondiciones (éxito)</strong></td>
@@ -1145,11 +1145,11 @@ hr { border: none; border-top: 1px solid #bbb; margin: 14pt 0; }
 </tr>
 <tr>
 <td><strong>Flujo principal</strong></td>
-<td>1. El vendedor crea un pedido e ingresa el nombre del cliente.<br>2. Agrega una o varias líneas: producto y cantidad.<br>3. El sistema valida cada línea: la cantidad debe ser mayor que cero y el producto debe existir y estar activo.<br>4. El sistema consulta y muestra las existencias disponibles de cada producto (solo lectura).<br>5. El sistema calcula el total, asigna el número y registra el pedido; <strong>en el mismo flujo intenta la confirmación automática</strong> (CU-04): si el inventario alcanza, el pedido queda <code>confirmado</code> con el descuento único hecho y <strong>listo para que bodega lo despache</strong>; si no alcanza, queda <code>pendiente</code> y se muestra el motivo del faltante.<br>6. El pedido queda consultable por todos los actores (CU-05).</td>
+<td>1. El vendedor crea un pedido, ingresa el nombre del cliente y (opcionalmente) una observación de entrega.<br>2. Agrega una o varias líneas: producto y cantidad.<br>3. El sistema valida cada línea: la cantidad debe ser mayor que cero y el producto debe existir y estar activo.<br>4. El sistema consulta y muestra las existencias disponibles de cada producto (solo lectura).<br>5. El sistema calcula el total, asigna el número y registra el pedido; <strong>en el mismo flujo intenta la confirmación automática</strong> (CU-04): si el inventario alcanza, el pedido queda <code>confirmado</code> con el descuento único hecho y <strong>listo para que bodega lo despache</strong>; si no alcanza, queda <code>pendiente</code> y se muestra el motivo del faltante.<br>6. El pedido queda consultable por todos los actores (CU-05).</td>
 </tr>
 <tr>
 <td><strong>Flujos alternativos</strong></td>
-<td><strong>A1 — Cantidad inválida:</strong> el sistema rechaza la línea con cantidad ≤ 0, muestra el mensaje y no la guarda (cantidades ≤ 0 rechazadas).<br><strong>A2 — Producto inexistente o inactivo:</strong> el sistema no permite agregar la línea y sugiere buscar de nuevo en el catálogo (CU-01).<br><strong>A3 — Pedido sin líneas:</strong> el sistema impide guardar un pedido vacío.<br><strong>A4 — Inventario insuficiente:</strong> el pedido se registra <code>pendiente</code> con el motivo (CU-04, flujo alternativo A1); el vendedor corrige con el cliente y reintenta la confirmación, o cancela el pedido (CU-08).<br><strong>A5 — Error de persistencia:</strong> el sistema informa el error; no queda un pedido a medias (todo o nada).</td>
+<td><strong>A1 — Cantidad inválida:</strong> el sistema rechaza la línea con cantidad &lt; 1, muestra «La cantidad debe ser al menos 1», deshabilita el guardado y no la guarda (cantidades ≤ 0 rechazadas).<br><strong>A2 — Producto inexistente o inactivo:</strong> el desplegable solo ofrece productos activos; si el producto ya no existe o está inactivo, el servidor rechaza el registro con «Uno o más productos seleccionados no existen o están inactivos.» (el catálogo sigue en CU-01).<br><strong>A3 — Pedido sin líneas:</strong> el sistema impide guardar un pedido vacío (no permite quitar la última línea, el botón queda deshabilitado y el servidor responde <code>PEDIDO_VACIO</code>).<br><strong>A4 — Inventario insuficiente:</strong> el pedido se registra <code>pendiente</code> con el motivo (CU-04, flujo alternativo A1); el vendedor acuerda el cambio con el cliente, reintenta la confirmación (por ejemplo, tras ajustar existencias desde el catálogo) o cancela el pedido y registra uno corregido (CU-08).<br><strong>A5 — Error de persistencia:</strong> el sistema informa el error; no queda un pedido a medias (todo o nada).</td>
 </tr>
 <tr>
 <td><strong>Postcondiciones (éxito)</strong></td>
@@ -1200,7 +1200,7 @@ hr { border: none; border-top: 1px solid #bbb; margin: 14pt 0; }
 </tr>
 <tr>
 <td><strong>Flujos alternativos</strong></td>
-<td><strong>A1 — Inventario insuficiente:</strong> el servidor <strong>impide</strong> la confirmación y muestra el motivo concreto (por ejemplo: «disponibles 8 jabones, solicitados 12»); el pedido sigue <code>pendiente</code> y las existencias no cambian (bloqueo con motivo). El vendedor ajusta las líneas y reintenta, o cancela el pedido (CU-08).<br><strong>A2 — Cantidad inválida detectada al revalidar:</strong> si una línea quedó con cantidad ≤ 0, la confirmación se bloquea y se señala la línea (cantidades ≤ 0 rechazadas).<br><strong>A3 — Reenvío o doble clic:</strong> la segunda llamada detecta que el pedido ya no está <code>pendiente</code> y <strong>no</strong> descuenta de nuevo (sin descuentos duplicados).<br><strong>A4 — Fallo en la operación:</strong> si la transacción falla a mitad, nada cambia: ni estado ni existencias (RNF-04: integridad del inventario).</td>
+<td><strong>A1 — Inventario insuficiente:</strong> el servidor <strong>impide</strong> la confirmación y muestra el motivo concreto (por ejemplo: «disponibles 8 jabones, solicitados 12»); el pedido sigue <code>pendiente</code> y las existencias no cambian (bloqueo con motivo). El vendedor acuerda el cambio con el cliente: reintenta la confirmación (por ejemplo, tras ajustar existencias desde el catálogo) o cancela el pedido y registra uno corregido (CU-08).<br><strong>A2 — Cantidad inválida detectada al revalidar:</strong> si en el formulario una línea queda con cantidad &lt; 1, el sistema señala la línea («La cantidad debe ser al menos 1»), impide guardar y la confirmación automática no se ejecuta (cantidades ≤ 0 rechazadas); en la base, el <code>CHECK (cantidad &gt; 0)</code> impide que exista una línea inválida.<br><strong>A3 — Reenvío o doble clic:</strong> la segunda llamada detecta que el pedido ya no está <code>pendiente</code> y <strong>no</strong> descuenta de nuevo (sin descuentos duplicados).<br><strong>A4 — Fallo en la operación:</strong> si la transacción falla a mitad, nada cambia: ni estado ni existencias (RNF-04: integridad del inventario).</td>
 </tr>
 <tr>
 <td><strong>Postcondiciones (éxito)</strong></td>
@@ -1247,7 +1247,7 @@ hr { border: none; border-top: 1px solid #bbb; margin: 14pt 0; }
 </tr>
 <tr>
 <td><strong>Flujos alternativos</strong></td>
-<td><strong>A1 — Sin pedidos:</strong> el sistema muestra «Aún no hay pedidos» y ofrece crear uno (CU-03).<br><strong>A2 — Búsqueda sin resultados:</strong> el sistema informa que ningún pedido coincide y limpia el filtro.<br><strong>A3 — Error de carga:</strong> se muestra el error con opción de reintento; nunca se presenta una lista vacía como si fuera la respuesta real.<br><strong>A4 — Cancelación desde la consulta (relación <code>&lt;&lt;extend&gt;&gt;</code> del diagrama):</strong> si el pedido está <code>pendiente</code> o <code>confirmado</code>, el actor puede cancelarlo desde el detalle; la ejecución continúa en CU-08.</td>
+<td><strong>A1 — Sin pedidos:</strong> el sistema muestra «No se encontraron pedidos» con el mensaje «No hay pedidos con el estado seleccionado.» y la pantalla ofrece el botón «Nuevo Pedido» (CU-03).<br><strong>A2 — Búsqueda sin resultados:</strong> el sistema muestra «Sin coincidencias para la búsqueda.» y ofrece un botón para limpiar la búsqueda.<br><strong>A3 — Error de carga:</strong> se muestra el error con opción de reintento; nunca se presenta una lista vacía como si fuera la respuesta real.<br><strong>A4 — Cancelación desde la consulta (relación <code>&lt;&lt;extend&gt;&gt;</code> del diagrama):</strong> si el pedido está <code>pendiente</code> o <code>confirmado</code>, el actor puede cancelarlo desde el detalle; la ejecución continúa en CU-08.</td>
 </tr>
 <tr>
 <td><strong>Postcondiciones (éxito)</strong></td>
@@ -1290,11 +1290,11 @@ hr { border: none; border-top: 1px solid #bbb; margin: 14pt 0; }
 </tr>
 <tr>
 <td><strong>Flujo principal</strong></td>
-<td>1. Bodega abre la lista de pedidos filtrando por estado <code>confirmado</code>.<br>2. Selecciona un pedido y revisa su detalle (líneas, cantidades y cliente).<br>3. Marca «Despachar».<br>4. El sistema verifica que la transición <code>confirmado → despachado</code> esté permitida, cambia el estado y registra la fecha y hora (estados y transiciones coherentes).<br>5. El sistema muestra el pedido como <code>despachado</code> y lo retira de la lista de pendientes.<br>6. La misma información queda visible para ventas, administración y gerencia (escritorio y móvil consultan los mismos registros).</td>
+<td>1. Bodega abre la pantalla en la pestaña «Pedidos por Despachar (Confirmados)» (la pantalla ofrece además la pestaña de solo lectura «Sin Confirmar (Solo Lectura)» con los pedidos en cola comercial).<br>2. Selecciona un pedido y revisa su detalle (líneas, cantidades y cliente).<br>3. Marca «Despachar».<br>4. El sistema verifica que la transición <code>confirmado → despachado</code> esté permitida, cambia el estado y registra la fecha y hora (estados y transiciones coherentes).<br>5. El sistema muestra el pedido como <code>despachado</code> y lo retira de la lista de pendientes.<br>6. La misma información queda visible para ventas, administración y gerencia (escritorio y móvil consultan los mismos registros).</td>
 </tr>
 <tr>
 <td><strong>Flujos alternativos</strong></td>
-<td><strong>A1 — Estado no válido:</strong> si el pedido está <code>pendiente</code>, <code>rechazado</code> o ya <code>despachado</code>, el sistema no permite la acción y muestra la transición válida (estados y transiciones coherentes).<br><strong>A2 — Diferencia física de inventario:</strong> si al preparar el pedido bodega detecta un faltante real, <strong>no</strong> modifica el pedido por su cuenta: el pedido vuelve a <code>rechazado</code> o se ajusta con ventas, documentando el motivo (no se aplican descuentos adicionales).<br><strong>A3 — Sin conectividad:</strong> la acción no se registra y el sistema lo informa; el pedido conserva su estado anterior (RNF-05: consistencia entre dispositivos).</td>
+<td><strong>A1 — Estado no válido:</strong> las acciones solo se ofrecen para el estado vigente («Despachar» aparece en pedidos <code>confirmado</code>); si el pedido está <code>pendiente</code>, <code>rechazado</code> o ya <code>despachado</code>, el botón no se muestra y, si la acción se intenta de todas formas, el servidor la rechaza con <code>TRANSICION_INVALIDA</code> indicando la transición válida (estados y transiciones coherentes).<br><strong>A2 — Diferencia física de inventario:</strong> si al preparar el pedido bodega detecta un faltante real, <strong>no</strong> modifica el pedido por su cuenta: reporta a ventas, quien cancela el pedido con motivo (CU-08) o se ajusta con el cliente, sin aplicar descuentos adicionales.<br><strong>A3 — Sin conectividad:</strong> la acción no se registra y el sistema lo informa; el pedido conserva su estado anterior (RNF-05: consistencia entre dispositivos).</td>
 </tr>
 <tr>
 <td><strong>Postcondiciones (éxito)</strong></td>
@@ -1384,11 +1384,11 @@ hr { border: none; border-top: 1px solid #bbb; margin: 14pt 0; }
 </tr>
 <tr>
 <td><strong>Flujo principal</strong></td>
-<td>1. El actor abre el pedido y pulsa «Cancelar».<br>2. El sistema pide confirmación y un motivo breve.<br>3. El sistema valida la transición hacia <code>rechazado</code> (estados y transiciones coherentes).<br>4. Si el pedido estaba <code>confirmado</code>, el sistema repone en la misma operación las existencias que descontó (reversión explícita, una sola vez).<br>5. El sistema registra el estado <code>rechazado</code>, el motivo y la fecha; el pedido queda fuera de las listas activas.</td>
+<td>1. El actor abre el pedido y pulsa «Cancelar».<br>2. El sistema pide confirmación y un motivo breve.<br>3. El sistema valida la transición hacia <code>rechazado</code> (estados y transiciones coherentes).<br>4. Si el pedido estaba <code>confirmado</code>, el sistema repone en la misma operación las existencias que descontó (reversión explícita, una sola vez).<br>5. El sistema registra el estado <code>rechazado</code>, el motivo y la fecha; el pedido sale de la cola de bodega y queda visible con su motivo en la lista de pedidos.</td>
 </tr>
 <tr>
 <td><strong>Flujos alternativos</strong></td>
-<td><strong>A1 — Pedido ya despachado:</strong> no se permite cancelar; el sistema sugiere gestionar la devolución fuera del alcance del sistema.<br><strong>A2 — Pedido ya rechazado:</strong> el sistema informa que la cancelación ya se hizo (evita acciones repetidas).<br><strong>A3 — Fallo al reponer existencias:</strong> si la reversión falla, el sistema no cambia el estado y reporta el error, para no quedar un pedido cancelado con inventario descontado (RNF-04: integridad del inventario).</td>
+<td><strong>A1 — Pedido ya despachado:</strong> no se ofrece el botón Cancelar (solo aparece para pedidos <code>pendiente</code> o <code>confirmado</code>); la devolución queda fuera del alcance del sistema.<br><strong>A2 — Pedido ya rechazado:</strong> el detalle muestra el banner con el «Motivo de rechazo / cancelación» y no se ofrece el botón Cancelar (evita acciones repetidas).<br><strong>A3 — Fallo al reponer existencias:</strong> si la reversión falla, el sistema no cambia el estado y reporta el error, para no quedar un pedido cancelado con inventario descontado (RNF-04: integridad del inventario).</td>
 </tr>
 <tr>
 <td><strong>Postcondiciones (éxito)</strong></td>

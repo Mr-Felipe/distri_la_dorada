@@ -37,11 +37,14 @@ rectangle "Sistema de gestion de pedidos e inventario" {
 V --> CU1
 V --> CU3
 V --> CU5
+V --> CU7
 V --> CU8
 B --> CU1
 B --> CU2
 B --> CU5
 B --> CU6
+B --> CU7
+G --> CU1
 G --> CU2
 G --> CU5
 G --> CU7

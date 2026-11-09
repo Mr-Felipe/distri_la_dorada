@@ -20,7 +20,7 @@ actor "Encargada de bodega" as B
 actor "Gerente / Administracion" as G
 
 package "CAPA 1 — INTERFAZ (presentacion)" #EAF3FF {
-  component "Aplicacion Web Angular\n(standalone, TypeScript + SCSS)\npantallas: catalogo, pedido,\nestados, resumen" as WEB
+  component "Aplicacion Web Angular\n(standalone, TypeScript + SCSS)\npantallas: catalogo, pedidos,\nbodega, resumen" as WEB
   component "Vista movil:\nla MISMA aplicacion\ndisena para 360 px\n(misma fuente en todo\ndispositivo; RNF-01:\nresponsividad)" as MOB
 }
 
