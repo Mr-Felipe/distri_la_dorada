@@ -34,7 +34,7 @@ if (¿Inventario\nsuficiente?) then (no)
   |Cliente (tiendas, restaurantes, comercios)|
   :Acepta o rechaza el cambio;
   |Aplicacion (logica y datos)|
-  :Corrige el pedido con el cliente:\nreintenta la confirmacion (p. ej. tras\najustar existencias) o cancela y registra\nuno corregido (sin descuento hasta confirmar);
+  :Corrige el pedido con el cliente (CU-09:\najusta lineas, cliente u observacion):\nreintenta la confirmacion o cancela y\nregistra uno corregido (sin descuento\nhasta confirmar);
 else (sí)
   :CONFIRMACION AUTOMATICA: el pedido\nqueda CONFIRMADO al registrarlo y\ndesconta existencias UNA sola vez, en\nla misma operacion transaccional (<color:#1B7F3B>M2</color>);
 endif

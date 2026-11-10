@@ -23,6 +23,7 @@ Toda escritura de pedidos se realiza **exclusivamente mediante RPC** (nunca inse
 - `confirmar_pedido(p_pedido_id)`: descuenta existencias de forma transaccional y única (sin doble descuento); si no alcanza, lanza `INVENTARIO_INSUFICIENTE: <detalle>` con los números concretos.
 - `despachar_pedido(p_pedido_id)`: marca el pedido como despachado con su timestamp.
 - `cancelar_pedido(p_pedido_id, p_motivo)`: pasa a `rechazado`, exige motivo y revierte el descuento si estaba confirmado.
+- `editar_pedido(p_pedido_id, p_cliente, p_items, p_observacion)`: ajusta un pedido **pendiente** (CU-09); reemplaza las líneas y recalcula el total en el servidor, sin cambiar el estado ni las existencias.
 - `resumen_por_estado()`: métricas consolidadas por estado (`vw_resumen_por_estado`).
 
 ---
@@ -53,7 +54,7 @@ La URL de Supabase y la clave *publishable* están en `frontend/src/environments
 - **Cantidades y precios > 0** (el precio acepta como mínimo `0.01`; mensaje en pantalla si no).
 - **Existencias ≥ 0** (0 = producto agotado, permitido).
 - Si al registrar un pedido **no alcanza el inventario**, el pedido queda `pendiente` y se muestra el motivo; el detalle permite reintentar «Confirmar Pedido» o cancelar con motivo.
-- Un pedido `pendiente` **no se edita**: se confirma cuando repone el inventario o se cancela y se crea otro nuevo.
+- Un pedido `pendiente` **sí se ajusta** desde su detalle («Editar Pedido», CU-09): cambian líneas, cliente y observación, pero el estado sigue `pendiente` y el inventario no se toca hasta «Confirmar Pedido» (CU-04); si no se quiere, se cancela (CU-08) y se crea otro nuevo.
 - Todo cambio de estado pasa por las RPC (la máquina de estados se valida en el servidor).
 
 ---
@@ -63,6 +64,6 @@ La URL de Supabase y la clave *publishable* están en `frontend/src/environments
 1. [x] `npm run build` compila sin errores; `npm run lint` limpio.
 2. [x] Catálogo: búsqueda por nombre o referencia, crear y editar producto (precio > 0), ajustar existencias desde bodega, activar/desactivar.
 3. [x] Pedidos: crear con múltiples líneas y total en COP; confirmación automática si alcanza inventario; si no, queda `pendiente` con motivo visible.
-4. [x] Detalle: transiciones válidas por estado (confirmar/despachar/cancelar con motivo); anti doble clic con spinner en los botones.
+4. [x] Detalle: transiciones válidas por estado (confirmar/despachar/cancelar con motivo) y edición de pedidos `pendiente` («Editar Pedido», CU-09); anti doble clic con spinner en los botones.
 5. [x] Manejo de errores: `INVENTARIO_INSUFICIENTE` y demás códigos se muestran como toast con el detalle literal (`disponibles X, solicitados Y`).
 6. [x] Responsividad: usable a 360 px sin scroll horizontal (verificado, evidencia en `docs/evidencias/`).
