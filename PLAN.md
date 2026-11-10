@@ -49,6 +49,7 @@ Construir un **sistema de información empresarial** que conecte **productos →
 - Integración con WhatsApp, pagos reales, facturación fiscal, contabilidad, logística avanzada.
 - App móvil **nativa** (opcional, sin puntos adicionales).
 - Autenticación/roles diferenciados → **RF-08 = Could**, es opcional. La **matriz de roles 5.7 es solo documental**.
+- **Auditoría (bitácora `auditoria`)** → **retirada por decisión del equipo** (migración `0008`); queda como mejora futura en el documento (5.10.2).
 
 ### 3.3 Requerimientos funcionales de referencia (guía §6)
 

@@ -1,3 +1,4 @@
+
 ' ============================================================
 ' Proyecto final integrador - Distribuidora La Dorada S.A.S.
 ' Apartado 5.6 - UNICO diagrama entidad-relacion
@@ -51,8 +52,8 @@ entity "pedido_items" as I {
   precio_unitario : NUMERIC(12,2)
 }
 
-P ||--o{ I : "se incluye en\n(N:M con pedidos)"
-PE ||--o{ I : "contiene (1:N,\nborrado en cascada)"
+P ||--o{ I : "se incluye en\n(1:N)"
+PE ||--o{ I : "contiene (1:N)"
 
 note bottom of PE
   El estado inicia en 'pendiente'.

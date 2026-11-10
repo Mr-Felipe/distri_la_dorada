@@ -352,7 +352,7 @@ hr { border: none; border-top: 1px solid #bbb; margin: 14pt 0; }
 <tr>
 <td>5.8</td>
 <td>Pruebas funcionales</td>
-<td>🟡 T-01 y T-02 ejecutadas con resultado real; T-03 pendiente de evidencia en navegador móvil</td>
+<td>✅ T-01, T-02 y T-03 ejecutadas con resultado real y con evidencia en <code>docs/evidencias/</code></td>
 </tr>
 <tr>
 <td>5.9</td>
@@ -863,6 +863,7 @@ hr { border: none; border-top: 1px solid #bbb; margin: 14pt 0; }
 <li><strong>Pagos reales</strong>, facturación fiscal, contabilidad y logística avanzada.</li>
 <li>Aplicación <strong>móvil nativa</strong> (opcional en la guía y sin puntos adicionales por sí sola).</li>
 <li><strong>Autenticación y permisos diferenciados</strong> en esta versión: la matriz de roles del apartado 5.7 es <strong>propuesta documental</strong>, no una funcionalidad implementada (RF-08: autenticación y permisos, prioridad Could).</li>
+<li><strong>Auditoría (bitácora de cambios):</strong> no se implementa en esta versión; la tabla <code>auditoria</code> y sus disparadores se retiraron con la migración <code>0008</code> por decisión del equipo y quedan como mejora futura (5.10.2).</li>
 <li>Multicompañía, catálogo multimoneda, venta al detal con precios por cantidad, notificaciones automáticas y modo sin conexión.</li>
 </ul>
 <h3>5.3.5 Supuestos y dependencias</h3>
@@ -903,8 +904,8 @@ hr { border: none; border-top: 1px solid #bbb; margin: 14pt 0; }
 </thead>
 <tbody>
 <tr>
-<td><strong>Rechazo de valores ≤ 0:</strong> cantidades, precios y existencias nunca pueden ser menores o iguales a cero</td>
-<td>Validación en los formularios, <code>CHECK</code> en la base de datos y validación en la RPC <code>crear_pedido()</code></td>
+<td><strong>Rechazo de valores ≤ 0:</strong> cantidades y precios deben ser <strong>mayores que cero</strong> (≤ 0 rechazadas); las existencias admiten <strong>≥ 0</strong> (un producto puede estar agotado)</td>
+<td>Formularios con <code>min</code> y mensaje en pantalla («La cantidad debe ser al menos 1», «El precio debe ser un número mayor a 0»); en la base de datos <code>CHECK (cantidad &gt; 0)</code>, <code>CHECK (precio &gt; 0)</code> y <code>CHECK (existencias ≥ 0)</code>; la RPC <code>crear_pedido()</code> además rechaza cantidades que no sean enteros ≥ 1 (<code>CANTIDAD_INVALIDA</code>)</td>
 </tr>
 <tr>
 <td><strong>Bloqueo con motivo:</strong> si no alcanza el inventario, la confirmación se impide y se muestra el motivo con números concretos</td>
@@ -1098,11 +1099,11 @@ hr { border: none; border-top: 1px solid #bbb; margin: 14pt 0; }
 </tr>
 <tr>
 <td><strong>Flujo principal</strong></td>
-<td>1. El actor abre el catálogo y pulsa «Nuevo producto» o selecciona un producto existente.<br>2. Ingresa o corrige: referencia (única), nombre, precio (≥ 0) y existencias (≥ 0).<br>3. El sistema valida formato, unicidad de la referencia y restricciones numéricas.<br>4. El sistema guarda el cambio y lo persiste en el servidor.<br>5. El catálogo se refresca y muestra el dato nuevo; si era una edición, los pedidos en curso conservan el precio congelado de sus líneas.</td>
+<td>1. El actor abre el catálogo y pulsa «Nuevo producto» o selecciona un producto existente.<br>2. Ingresa o corrige: referencia (única), nombre, precio (&gt; 0) y existencias (≥ 0).<br>3. El sistema valida formato, unicidad de la referencia y restricciones numéricas.<br>4. El sistema guarda el cambio y lo persiste en el servidor.<br>5. El catálogo se refresca y muestra el dato nuevo; si era una edición, los pedidos en curso conservan el precio congelado de sus líneas.</td>
 </tr>
 <tr>
 <td><strong>Flujos alternativos</strong></td>
-<td><strong>A1 — Referencia duplicada:</strong> el sistema rechaza el guardado y señala el producto que ya usa esa referencia.<br><strong>A2 — Precio o existencias negativos:</strong> el sistema rechaza el valor y muestra la restricción (≥ 0), aplicando la misma regla de valores ≤ 0 usada en cantidades.<br><strong>A3 — Producto con histórico de pedidos:</strong> no se borra; se marca <code>activo = false</code>: aparece como <strong>Inactivo</strong> en el catálogo (y puede filtrarse fuera con «Solo activos para venta»), no se ofrece en los nuevos pedidos y los pedidos antiguos se conservan (RF-06: los registros se conservan).<br><strong>A4 — Error de persistencia:</strong> el sistema informa que el cambio no se guardó y permite reintentar.</td>
+<td><strong>A1 — Referencia duplicada:</strong> el sistema rechaza el guardado y señala el producto que ya usa esa referencia.<br><strong>A2 — Precio ≤ 0 o existencias negativas:</strong> el sistema rechaza el precio que no sea mayor a 0 y muestra «El precio debe ser un número mayor a 0»; las existencias admiten ≥ 0 (el 0 está permitido: producto agotado) y solo se rechazan los negativos.<br><strong>A3 — Producto con histórico de pedidos:</strong> no se borra; se marca <code>activo = false</code>: aparece como <strong>Inactivo</strong> en el catálogo (y puede filtrarse fuera con «Solo activos para venta»), no se ofrece en los nuevos pedidos y los pedidos antiguos se conservan (RF-06: los registros se conservan).<br><strong>A4 — Error de persistencia:</strong> el sistema informa que el cambio no se guardó y permite reintentar.</td>
 </tr>
 <tr>
 <td><strong>Postcondiciones (éxito)</strong></td>
@@ -1533,8 +1534,8 @@ hr { border: none; border-top: 1px solid #bbb; margin: 14pt 0; }
 <tr>
 <td></td>
 <td><code>nombre</code>, <code>precio</code></td>
-<td>VARCHAR / NUMERIC ≥ 0</td>
-<td>Datos de catálogo (RF-01: consultar productos; RF-02: editar productos)</td>
+<td>VARCHAR / NUMERIC <strong>&gt; 0</strong></td>
+<td>Datos de catálogo (RF-01: consultar productos; RF-02: editar productos; el precio debe ser mayor a 0)</td>
 </tr>
 <tr>
 <td></td>
@@ -1636,7 +1637,7 @@ hr { border: none; border-top: 1px solid #bbb; margin: 14pt 0; }
 <tr>
 <td>productos</td>
 <td>tabla <code>productos</code></td>
-<td><code>id, referencia (única), nombre, precio ≥ 0, existencias ≥ 0, activo, creado_en, actualizado_en</code></td>
+<td><code>id, referencia (única), nombre, precio &gt; 0, existencias ≥ 0, activo, creado_en, actualizado_en</code></td>
 <td>✅ Desplegada (15 productos de prueba)</td>
 </tr>
 <tr>
@@ -1648,13 +1649,13 @@ hr { border: none; border-top: 1px solid #bbb; margin: 14pt 0; }
 <tr>
 <td>pedido_items</td>
 <td>tabla <code>pedido_items</code></td>
-<td><code>id, pedido_id, producto_id, cantidad &gt; 0, precio_unitario ≥ 0</code> + claves foráneas con borrado en cascada</td>
+<td><code>id, pedido_id, producto_id, cantidad &gt; 0, precio_unitario &gt; 0</code> + claves foráneas con borrado en cascada</td>
 <td>✅ Desplegada</td>
 </tr>
 <tr>
 <td>Restricciones</td>
 <td><code>CHECK</code>, <code>UNIQUE</code>, claves foráneas y disparadores</td>
-<td>cantidades &gt; 0, precios y existencias ≥ 0, estados válidos; disparadores <code>fn_pedidos_transicion()</code> y <code>fn_actualizar_en()</code></td>
+<td>cantidades &gt; 0, precios &gt; 0 y existencias ≥ 0, estados válidos; disparadores <code>fn_pedidos_transicion()</code> y <code>fn_actualizar_en()</code></td>
 <td>✅ Activas</td>
 </tr>
 <tr>
@@ -1667,7 +1668,7 @@ hr { border: none; border-top: 1px solid #bbb; margin: 14pt 0; }
 <td>Bitácora interna (mecanismo técnico, sin interfaz)</td>
 <td>tabla <code>auditoria</code> + disparadores</td>
 <td>registro automático de cada escritura con valores anteriores y posteriores; soporta las métricas de 5.9</td>
-<td>✅ Activa</td>
+<td>❌ Retirada: eliminada con la migración <code>0008</code> por decisión del equipo; queda como mejora futura (5.10.2)</td>
 </tr>
 </tbody>
 </table>
@@ -1813,8 +1814,12 @@ hr { border: none; border-top: 1px solid #bbb; margin: 14pt 0; }
 <td>Copias de respaldo programadas y restauración probada</td>
 </tr>
 <tr>
-<td>Bitácora/auditoría de cambios (mecanismo técnico, sin interfaz)</td>
+<td>Confirmación automática al registrar el pedido cuando el inventario alcanza (To-Be)</td>
 <td>Integración con la API de WhatsApp para avisos automáticos</td>
+</tr>
+<tr>
+<td></td>
+<td><strong>Bitácora/auditoría de cambios</strong> (tabla <code>auditoria</code>; retirada con la migración <code>0008</code>, ver 5.10.2)</td>
 </tr>
 </tbody>
 </table>
@@ -1824,7 +1829,7 @@ hr { border: none; border-top: 1px solid #bbb; margin: 14pt 0; }
 <hr>
 <h1>JORNADA 4 · VALIDACIÓN Y ENTREGA</h1>
 <h2>5.8 Pruebas funcionales</h2>
-<p>La matriz siguiente es la <strong>única</strong> evidencia de pruebas del documento; usa los tres escenarios obligatorios de la guía (sección 8) y no se repite en ningún otro apartado. T-01 y T-02 se ejecutaron contra el proyecto desplegado <strong>por API y además en el navegador sin inicio de sesión</strong> (verificación end-to-end con Chrome DevTools, 09/11/2026); en la versión actual la confirmación ocurre <strong>automáticamente al registrar el pedido</strong> cuando el inventario alcanza, y los escenarios también se repitieron con ese flujo. La sustentación puede repetirlos en vivo. T-03 se completa con el navegador del teléfono.</p>
+<p>La matriz siguiente es la <strong>única</strong> evidencia de pruebas del documento; usa los tres escenarios obligatorios de la guía (sección 8) y no se repite en ningún otro apartado. T-01 y T-02 se ejecutaron contra el proyecto desplegado <strong>por API y además en el navegador sin inicio de sesión</strong> (verificación end-to-end con Chrome DevTools, 09/11/2026); en la versión actual la confirmación ocurre <strong>automáticamente al registrar el pedido</strong> cuando el inventario alcanza, y los escenarios también se repitieron con ese flujo. La sustentación puede repetirlos en vivo. T-03 se ejecutó con el navegador del teléfono (emulado a 360 px) y quedó con evidencia en <code>docs/evidencias/</code>.</p>
 <table>
 <thead>
 <tr>
@@ -1845,7 +1850,7 @@ hr { border: none; border-top: 1px solid #bbb; margin: 14pt 0; }
 <td>1. Abrir la app. 2. Registrar el pedido de 5 detergentes (el sistema intenta la confirmación automática). 3. Leer el estado final y consultar el catálogo y el detalle. 4. Intentar confirmar de nuevo (reintento)</td>
 <td>El pedido queda <code>confirmado</code>; las existencias de detergente pasan de <strong>60 a 55</strong> y se descontaron <strong>una sola vez</strong></td>
 <td>✅ Ejecutado (09/11/2026): <strong>por API</strong>, <code>PED-2026-0005</code> quedó <code>confirmado</code>, existencias <strong>60 → 55</strong> y la segunda confirmación fue rechazada con <code>TRANSICION_INVALIDA</code> (sin doble descuento); <strong>en navegador sin sesión con confirmación automática</strong>, <code>PED-2026-0009</code> nació directamente <code>confirmado</code> al registrarlo (CER-001 <strong>32 → 31</strong>, un solo descuento) y quedó visible para despacho</td>
-<td>API y verificación end-to-end en navegador (Chrome DevTools) sobre el proyecto desplegado; capturas de pantalla pendientes para la sustentación</td>
+<td>API y verificación end-to-end en navegador (Chrome DevTools) sobre el proyecto desplegado; captura en <code>docs/evidencias/t01-existencias-detergente-55.png</code> (catálogo con DET-001 en <strong>55 uds</strong> tras el pedido de 5)</td>
 </tr>
 <tr>
 <td><strong>T-02</strong></td>
@@ -1854,7 +1859,7 @@ hr { border: none; border-top: 1px solid #bbb; margin: 14pt 0; }
 <td>1. Registrar el pedido de 130 jabones (la confirmación automática se intenta al registrar). 2. Leer el mensaje mostrado. 3. Consultar el catálogo. 4. Si se desea, pulsar «Confirmar» para reintentar</td>
 <td>La confirmación se <strong>impide</strong> y se muestra el motivo (disponibles 120, solicitados 130); las existencias de jabón <strong>siguen en 120</strong></td>
 <td>✅ Ejecutado (09/11/2026): <strong>por API</strong>, error <code>INVENTARIO_INSUFICIENTE: Jabon en barra 125 g (disponibles 120, solicitados 130)</code> con existencias intactas; <strong>en navegador sin sesión</strong>, al registrar <code>PED-2026-0010</code> (999 PAN-001 con 25 disponibles) quedó <code>pendiente</code> con el motivo «Pan rebanado 500 g (disponibles 25, solicitados 999)», el reintento mostró el mismo bloqueo y las existencias siguieron en 25</td>
-<td>API y verificación end-to-end en navegador (Chrome DevTools) sobre el proyecto desplegado; captura del mensaje de bloqueo pendiente para la sustentación</td>
+<td>API y verificación end-to-end en navegador (Chrome DevTools) sobre el proyecto desplegado; captura en <code>docs/evidencias/t02-mensaje-bloqueo.png</code> (toast «Inventario insuficiente» con el motivo sobre <code>PED-2026-0010</code>)</td>
 </tr>
 <tr>
 <td><strong>T-03</strong></td>
@@ -1862,14 +1867,14 @@ hr { border: none; border-top: 1px solid #bbb; margin: 14pt 0; }
 <td>Un pedido ya registrado; navegador del teléfono o emulador</td>
 <td>1. Registrar un pedido desde el computador. 2. Abrir la app desde el teléfono/emulador y buscar el pedido. 3. Cerrar y reabrir la aplicación. 4. Volver a consultar el pedido y el catálogo</td>
 <td>El pedido aparece desde el móvil con <strong>el mismo estado y detalle</strong>, y <strong>persiste</strong> tras cerrar y reabrir</td>
-<td>🟡 Parcial: la persistencia está verificada por API (una sesión nueva consulta el pedido con el mismo estado y detalle) y la aplicación se recorrió completa en navegador de escritorio sin sesión (catálogo, pedidos, detalle, resumen y bodega); falta la evidencia en navegador móvil</td>
-<td>Pendiente: captura del teléfono y tras reabrir la app</td>
+<td>✅ Ejecutado (09/11/2026): en emulador móvil (360 px, táctil) el pedido <code>PED-2026-0009</code> se mostró con el <strong>mismo estado y detalle</strong> que en escritorio (confirmado, cliente, fechas, línea y total); tras <strong>cerrar y reabrir</strong> (recarga de la aplicación) el detalle, la lista de pedidos y el catálogo volvieron a cargar con los mismos datos (persistencia); sin desbordes horizontales (ancho 360 px) ni errores en consola</td>
+<td>Capturas en <code>docs/evidencias/</code>: <code>t03-01-pedidos-movil.png</code> (lista), <code>t03-02-detalle-pedido-movil.png</code> (detalle), <code>t03-03-persistencia-tras-reabrir.png</code> (detalle tras reabrir) y <code>t03-04-catalogo-movil.png</code> (catálogo); verificación end-to-end en navegador móvil emulado (Chrome DevTools)</td>
 </tr>
 </tbody>
 </table>
 <p><strong>Criterio de aprobación de la matriz:</strong> los tres resultados obtenidos coinciden con los esperados; cualquier desviación se documenta en el apartado 5.10 como limitación, sin crear un informe de pruebas adicional.</p>
 <h2>5.9 Métricas de éxito</h2>
-<p>Tres indicadores para evaluar el sistema en uso. El sistema ya registra las marcas de tiempo y la bitácora necesarias para medirlos; mientras no haya operación real, se mantienen como metas hipotéticas sobre la línea base didáctica.</p>
+<p>Tres indicadores para evaluar el sistema en uso. El sistema ya registra las marcas de tiempo necesarias para medirlos; la bitácora de auditoría prevista para los ajustes manuales quedó fuera de esta versión (5.10.2). Mientras no haya operación real, se mantienen como metas hipotéticas sobre la línea base didáctica.</p>
 <table>
 <thead>
 <tr>
@@ -1948,14 +1953,14 @@ hr { border: none; border-top: 1px solid #bbb; margin: 14pt 0; }
 </tr>
 <tr>
 <td>Ejecución de T-01, T-02 y T-03 con evidencia</td>
-<td>🟡 T-01 y T-02 ejecutadas por API y verificadas en navegador (5.8); T-03 pendiente de evidencia móvil</td>
+<td>✅ T-01, T-02 y T-03 ejecutadas con resultado real, verificadas en navegador (5.8) y con capturas en <code>docs/evidencias/</code></td>
 </tr>
 </tbody>
 </table>
 <h3>5.10.2 Qué quedó pendiente</h3>
 <ul>
-<li>Evidencia en navegador móvil de T-03 y capturas de pantalla de T-01 y T-02 para la sustentación.</li>
 <li><strong>RF-08 (autenticación y permisos diferenciados, Could): no implementado</strong> en esta versión; su matriz queda documentada como propuesta en 5.7.1.</li>
+<li><strong>Bitácora de auditoría (tabla <code>auditoria</code>): eliminada</strong> con la migración <code>0008</code> por decisión del equipo (esta versión no lleva auditorías); queda anotada como mejora futura (5.3.4 y 5.6.4).</li>
 <li>Los demás controles de la columna derecha del apartado 5.7.3 (alertas de inventario mínimo, notificaciones al cliente, respaldos con restauración probada, integración con la API de WhatsApp).</li>
 <li>Publicación de la aplicación para acceso fuera del aula (si el tiempo lo permite).</li>
 </ul>
@@ -1966,6 +1971,6 @@ hr { border: none; border-top: 1px solid #bbb; margin: 14pt 0; }
 <li>La integración con WhatsApp queda limitada a recibir el pedido de forma manual; no hay notificaciones automáticas al cliente.</li>
 </ul>
 <h3>5.10.4 Mejora futura priorizada</h3>
-<p><strong>Autenticación por roles (RF-08) y, en segundo lugar, alertas de inventario mínimo.</strong> Con las cinco reglas de negocio y la bitácora técnica ya implementadas, la mejora con mejor relación impacto-esfuerzo es implementar la sesión con roles de la matriz propuesta de 5.7 (cierre del riesgo R-2), y sobre esa base añadir avisos al vendedor cuando un producto baja del mínimo y la confirmación del pedido por WhatsApp, apoyándose en las marcas de tiempo y la bitácora de 5.6.4 para medir las métricas M-2 y M-3 sin depender de registros manuales.</p>
+<p><strong>Autenticación por roles (RF-08) y, en segundo lugar, alertas de inventario mínimo.</strong> Con las cinco reglas de negocio ya implementadas, la mejora con mejor relación impacto-esfuerzo es implementar la sesión con roles de la matriz propuesta de 5.7 (cierre del riesgo R-2), y sobre esa base añadir avisos al vendedor cuando un producto baja del mínimo y la confirmación del pedido por WhatsApp, apoyándose en las marcas de tiempo existentes y, cuando se reincorpore, en la bitácora de auditoría prevista en 5.10.2 para medir las métricas M-2 y M-3 sin depender de registros manuales.</p>
 </body>
 </html>

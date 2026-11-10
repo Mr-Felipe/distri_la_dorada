@@ -1,98 +1,68 @@
-# Distribuidora La Dorada S.A.S. — Sistema de Gestión de Pedidos e Inventario
+# Distribuidora La Dorada S.A.S. — Frontend
 
-Frontend en **Angular 21+ (Standalone, Signals, Reactive Forms)** conectado a **Supabase (PostgREST + RPCs + Auth)** para la gestión comercial y logística de pedidos por WhatsApp y catálogo de productos.
+Frontend en **Angular 21 (Standalone, Signals, Reactive Forms)** conectado a **Supabase (PostgREST + RPCs)** para la gestión de catálogo, pedidos e inventario.
 
----
-
-## 1. Stack Tecnológico
-
-- **Framework**: Angular 21 Standalone (Zoneless, Signals: `signal()`, `computed()`, `input()`, `output()`).
-- **Base de Datos & Auth**: `@supabase/supabase-js` v2.
-- **Formularios**: Reactive Forms con validaciones estrictas.
-- **Estilos**: SCSS / CSS Moderno con variables de diseño (Paleta Azul Marino `#0f2744` & Dorado `#d4af37`), componentes UI propios (sin Material ni component libraries).
-- **Control de Acceso (RBAC)**: Matriz de permisos estricta por rol (`admin`, `vendedor`, `bodega`).
-- **Control Flow**: Sintaxis nativa de Angular (`@if`, `@for`, `@switch`, `@let`).
+> **Web abierta, sin inicio de sesión:** esta versión no tiene autenticación ni roles (RF-08 quedó como propuesta documental en el documento técnico, 5.7). Tampoco lleva bitácora de auditoría (retirada con la migración `0008`; mejora futura).
 
 ---
 
-## 2. Usuarios de Prueba (Supabase Auth)
+## 1. Stack
 
-| Correo | Contraseña | Rol Asignado | Alcance Principal |
-|---|---|---|---|
-| `admin@ladorada.test` | `Admin1234*` | **admin** | Control total, catálogo, pedidos, bodega y auditoría |
-| `vendedor@ladorada.test` | `Vende1234*` | **vendedor** | Catálogo, crear y confirmar/cancelar pedidos |
-| `bodega@ladorada.test` | `Bode1234*` | **bodega** | Ajuste de stock físico y despacho de pedidos confirmados |
-| `prueba@ladorada.test` | `Prueba1234*` | **vendedor** | Segundo vendedor para pruebas concurrentes |
-
-> *Nota*: En la pantalla de login `/login`, hay botones rápidos para autocompletar estas credenciales.
+- **Framework**: Angular 21 Standalone (`@if`, `@for`, `@switch`, signals, reactive forms).
+- **Backend**: `@supabase/supabase-js` v2 — PostgREST para lecturas y **RPCs** para toda escritura de pedidos.
+- **Estilos**: CSS propio con variables de diseño (paleta Azul Marino `#0f2744` y Dorado `#d4af37`), sin librerías de componentes.
+- **Moneda**: COP con formato colombiano (`$ 8.900`).
 
 ---
 
-## 3. Matriz de Permisos Implementada (§6)
+## 2. RPCs del servidor
 
-| Acción en el Sistema | Admin | Vendedor | Bodega |
-|---|:---:|:---:|:---:|
-| Ver catálogo de productos | ✔ | ✔ | ✔ |
-| Crear y editar producto (nombre, precio, ref) | ✔ | ✔ | ✖ |
-| Ajustar existencias físicas en bodega | ✔ | ✖ | ✔ |
-| Activar / Desactivar producto | ✔ | ✖ | ✖ |
-| Ver listado de pedidos y detalle | ✔ | ✔ | ✔ |
-| Crear nuevo pedido WhatsApp | ✔ | ✔ | ✖ |
-| Confirmar pedido (reserva stock en servidor) | ✔ | ✔ | ✖ |
-| Cancelar pedido (reversa stock si confirmado) | ✔ | ✔ | ✖ |
-| Despachar pedido | ✔ | ✖ | ✔ |
-| Ver resumen financiero y métricas | ✔ | ✔ | ✔ |
-| Ver actividad y auditoría (trazabilidad) | ✔ | ✖ | ✖ |
+Toda escritura de pedidos se realiza **exclusivamente mediante RPC** (nunca inserts/updates directos en `pedidos` ni `pedido_items`):
+
+- `crear_pedido(p_cliente, p_items, p_observacion)`: nace en `pendiente` e intenta la **confirmación automática**; si el inventario no alcanza, queda `pendiente` con el motivo (`INVENTARIO_INSUFICIENTE: <detalle>`).
+- `confirmar_pedido(p_pedido_id)`: descuenta existencias de forma transaccional y única (sin doble descuento); si no alcanza, lanza `INVENTARIO_INSUFICIENTE: <detalle>` con los números concretos.
+- `despachar_pedido(p_pedido_id)`: marca el pedido como despachado con su timestamp.
+- `cancelar_pedido(p_pedido_id, p_motivo)`: pasa a `rechazado`, exige motivo y revierte el descuento si estaba confirmado.
+- `resumen_por_estado()`: métricas consolidadas por estado (`vw_resumen_por_estado`).
 
 ---
 
-## 4. RPCs del Servidor Mapeadas Exactamente (§4)
-
-Todas las escrituras de pedidos se realizan **exclusivamente mediante RPC** (nunca direct inserts/updates en `pedidos` ni `pedido_items`):
-
-- `crear_pedido(p_cliente, p_items, p_observacion)`: Nace en estado `pendiente`.
-- `confirmar_pedido(p_pedido_id)`: Descuenta existencias en el servidor de forma transaccional. Si el inventario no alcanza, genera excepción `INVENTARIO_INSUFICIENTE: <detalle>` que se presenta de forma literal al usuario.
-- `despachar_pedido(p_pedido_id)`: Marca el pedido como despachado con su timestamp.
-- `cancelar_pedido(p_pedido_id, p_motivo)`: Cambia a `rechazado`, exige motivo y reversa el descuento de inventario si estaba confirmado.
-- `resumen_por_estado()`: Retorna métricas consolidadas por estado (`vw_resumen_por_estado`).
-
----
-
-## 5. Instrucciones de Ejecución
+## 3. Instrucciones de ejecución
 
 ```bash
 # 1. Instalar dependencias
-npm install
+npm ci
 
-# 2. Iniciar servidor de desarrollo
-npm run dev
-# o con angular cli estándar:
-# ng serve --port 3000
+# 2. Iniciar servidor de desarrollo (→ http://localhost:4200)
+ng serve
+# o: npm start
 
-# 3. Compilar para producción (Type-check estricto AOT)
+# 3. Compilar para producción
 npm run build
+
+# 4. Lint
+npm run lint
 ```
+
+La URL de Supabase y la clave *publishable* están en `frontend/src/environments/environment.ts`.
 
 ---
 
-## 6. Checklist de Verificación (Definition of Done)
+## 4. Reglas de negocio visibles en la interfaz
 
-1. [x] **Compilación**: `npm run build` compila sin errores en modo estricto.
-2. [x] **Autenticación**: Iniciar sesión con los 4 usuarios de prueba; el menú superior adapta dinámicamente sus módulos según el rol.
-3. [x] **Catálogo**:
-   - Vendedor y Admin pueden crear/editar productos.
-   - Bodega puede ajustar existencias físicas con el modal rápido y no puede editar precios ni nombres.
-   - Vendedor tiene bloqueado el ajuste manual de stock.
-   - Admin puede activar/desactivar referencias.
-4. [x] **Flujo Completo de Pedidos**:
-   - Crear pedido con múltiples productos y cálculo en vivo en moneda colombiana (COP).
-   - Confirmar pedido: descuenta stock automáticamente.
-   - Bodega visualiza el pedido confirmado y realiza el despacho.
-   - Cancelar pedido: solicita motivo obligatorio y revierte inventario si estaba confirmado.
-5. [x] **Manejo de Errores**:
-   - Detección de `INVENTARIO_INSUFICIENTE` mostrando detalle literal (ej. `disponibles X, solicitados Y`).
-   - Anti doble clic con spinners integrados en todos los botones de acción.
-6. [x] **Diseño y Responsividad**:
-   - Interfaz corporativa sobria en tonos Azul Marino y Dorado.
-   - Tarjetas apiladas automáticas en pantallas móviles (< 768px).
-   - Cero scroll horizontal en resoluciones móviles (360px).
+- **Cantidades y precios > 0** (el precio acepta como mínimo `0.01`; mensaje en pantalla si no).
+- **Existencias ≥ 0** (0 = producto agotado, permitido).
+- Si al registrar un pedido **no alcanza el inventario**, el pedido queda `pendiente` y se muestra el motivo; el detalle permite reintentar «Confirmar Pedido» o cancelar con motivo.
+- Un pedido `pendiente` **no se edita**: se confirma cuando repone el inventario o se cancela y se crea otro nuevo.
+- Todo cambio de estado pasa por las RPC (la máquina de estados se valida en el servidor).
+
+---
+
+## 5. Checklist de verificación
+
+1. [x] `npm run build` compila sin errores; `npm run lint` limpio.
+2. [x] Catálogo: búsqueda por nombre o referencia, crear y editar producto (precio > 0), ajustar existencias desde bodega, activar/desactivar.
+3. [x] Pedidos: crear con múltiples líneas y total en COP; confirmación automática si alcanza inventario; si no, queda `pendiente` con motivo visible.
+4. [x] Detalle: transiciones válidas por estado (confirmar/despachar/cancelar con motivo); anti doble clic con spinner en los botones.
+5. [x] Manejo de errores: `INVENTARIO_INSUFICIENTE` y demás códigos se muestran como toast con el detalle literal (`disponibles X, solicitados Y`).
+6. [x] Responsividad: usable a 360 px sin scroll horizontal (verificado, evidencia en `docs/evidencias/`).
