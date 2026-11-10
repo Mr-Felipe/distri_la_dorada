@@ -181,6 +181,45 @@ export class PedidoService {
   }
 
   /**
+   * RPC: editar_pedido (CU-09)
+   * Permite ajustar cliente, observación y líneas de un pedido PENDIENTE.
+   * No cambia el estado ni toca existencias: la confirmación sigue siendo
+   * manual con confirmarPedido (CU-04).
+   */
+  async editarPedido(
+    pedidoId: string,
+    cliente: string,
+    items: ItemSolicitadoDTO[],
+    observacion?: string
+  ): Promise<void> {
+    if (!cliente || cliente.trim().length === 0) {
+      throw {
+        titulo: 'Cliente requerido',
+        mensaje: 'Debe ingresar el nombre del cliente.'
+      };
+    }
+
+    const params: { p_pedido_id: string; p_cliente: string; p_items: ItemSolicitadoDTO[]; p_observacion?: string } = {
+      p_pedido_id: pedidoId,
+      p_cliente: cliente.trim(),
+      p_items: items.map(i => ({
+        producto_id: i.producto_id,
+        cantidad: Math.floor(Number(i.cantidad))
+      }))
+    };
+
+    if (observacion && observacion.trim().length > 0) {
+      params.p_observacion = observacion.trim();
+    }
+
+    const { error } = await this.supabase.client.rpc('editar_pedido', params);
+
+    if (error) {
+      throw mapError(error);
+    }
+  }
+
+  /**
    * RPC: cancelar_pedido
    * Parámetros: p_pedido_id, p_motivo
    * Pasa a rechazado y reversa inventario si estaba confirmado.

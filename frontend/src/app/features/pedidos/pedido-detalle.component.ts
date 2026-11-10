@@ -1,9 +1,22 @@
-import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
 import { PedidoService } from '../../core/services/pedido.service';
+import { ProductoService } from '../../core/services/producto.service';
 import { ToastService } from '../../core/services/toast.service';
 import { Pedido } from '../../core/models/pedido';
+import { Producto } from '../../core/models/producto';
+
+/** Línea en edición local (CU-09). `key` identifica la fila en la tabla. */
+interface LineaEdicion {
+  key: string;
+  producto_id: string;
+  cantidad: number;
+  precio_unitario: number;
+  nombre: string;
+  referencia: string;
+  existencias: number;
+}
 import { formatearCOP, formatearFecha, formatearNumeroPedido } from '../../core/utils/formato';
 import { mapError } from '../../core/utils/errores';
 import { BadgeEstado } from '../../shared/badge-estado/badge-estado';
@@ -48,47 +61,84 @@ import { Modal } from '../../shared/modal/modal';
               </div>
             </div>
 
-            <!-- Botones de Acción según el estado del pedido (CU-04 / CU-08) -->
+            <!-- Botones de Acción según el estado del pedido (CU-04 / CU-08 / CU-09) -->
             <div class="acciones-cabecera">
-              <!-- Acción CONFIRMAR (solo estado pendiente) -->
-              @if (ped.estado === 'pendiente') {
+              @if (editando()) {
+                <!-- Acciones del modo edición (CU-09) -->
                 <app-boton-cargando
                   [variante]="'dorado'"
                   [tamano]="'md'"
                   [cargando]="procesandoAccion()"
-                  [icono]="'check_circle'"
-                  [textoCargando]="'Confirmando...'"
-                  (accionar)="confirmar()"
+                  [deshabilitado]="!edicionValida()"
+                  [icono]="'save'"
+                  [textoCargando]="'Guardando...'"
+                  (accionar)="guardarEdicion()"
                 >
-                  Confirmar Pedido
+                  Confirmar cambios
                 </app-boton-cargando>
-              }
-
-              <!-- Acción DESPACHAR (solo estado confirmado) -->
-              @if (ped.estado === 'confirmado') {
                 <app-boton-cargando
-                  [variante]="'exito'"
+                  [variante]="'secundario'"
                   [tamano]="'md'"
-                  [cargando]="procesandoAccion()"
-                  [icono]="'local_shipping'"
-                  [textoCargando]="'Despachando...'"
-                  (accionar)="despachar()"
+                  [deshabilitado]="procesandoAccion()"
+                  [icono]="'close'"
+                  (accionar)="cancelarEdicion()"
                 >
-                  Despachar Pedido
+                  Cancelar edición
                 </app-boton-cargando>
-              }
+              } @else {
+                <!-- Acción EDITAR (solo estado pendiente, CU-09) -->
+                @if (ped.estado === 'pendiente') {
+                  <app-boton-cargando
+                    [variante]="'secundario'"
+                    [tamano]="'md'"
+                    [deshabilitado]="procesandoAccion()"
+                    [icono]="'edit'"
+                    (accionar)="iniciarEdicion()"
+                  >
+                    Editar Pedido
+                  </app-boton-cargando>
+                }
 
-              <!-- Acción CANCELAR (pendiente o confirmado) -->
-              @if (ped.estado === 'pendiente' || ped.estado === 'confirmado') {
-                <app-boton-cargando
-                  [variante]="'peligro'"
-                  [tamano]="'md'"
-                  [cargando]="procesandoAccion()"
-                  [icono]="'cancel'"
-                  (accionar)="abrirModalCancelar()"
-                >
-                  Cancelar Pedido
-                </app-boton-cargando>
+                <!-- Acción CONFIRMAR (solo estado pendiente) -->
+                @if (ped.estado === 'pendiente') {
+                  <app-boton-cargando
+                    [variante]="'dorado'"
+                    [tamano]="'md'"
+                    [cargando]="procesandoAccion()"
+                    [icono]="'check_circle'"
+                    [textoCargando]="'Confirmando...'"
+                    (accionar)="confirmar()"
+                  >
+                    Confirmar Pedido
+                  </app-boton-cargando>
+                }
+
+                <!-- Acción DESPACHAR (solo estado confirmado) -->
+                @if (ped.estado === 'confirmado') {
+                  <app-boton-cargando
+                    [variante]="'exito'"
+                    [tamano]="'md'"
+                    [cargando]="procesandoAccion()"
+                    [icono]="'local_shipping'"
+                    [textoCargando]="'Despachando...'"
+                    (accionar)="despachar()"
+                  >
+                    Despachar Pedido
+                  </app-boton-cargando>
+                }
+
+                <!-- Acción CANCELAR (pendiente o confirmado) -->
+                @if (ped.estado === 'pendiente' || ped.estado === 'confirmado') {
+                  <app-boton-cargando
+                    [variante]="'peligro'"
+                    [tamano]="'md'"
+                    [cargando]="procesandoAccion()"
+                    [icono]="'cancel'"
+                    (accionar)="abrirModalCancelar()"
+                  >
+                    Cancelar Pedido
+                  </app-boton-cargando>
+                }
               }
             </div>
           </div>
@@ -99,6 +149,16 @@ import { Modal } from '../../shared/modal/modal';
               <span class="material-icons">info</span>
               <div>
                 <strong>Existencias reservadas:</strong> El inventario de este pedido fue descontado del catálogo automáticamente en el servidor.
+              </div>
+            </div>
+          }
+
+          <!-- Modo edición (CU-09): el pedido sigue pendiente hasta la confirmación manual -->
+          @if (editando()) {
+            <div class="banner-edicion">
+              <span class="material-icons">edit_note</span>
+              <div>
+                <strong>Modo edición:</strong> ajusta cliente, observación y líneas del pedido. Al guardar, el pedido seguirá <strong>pendiente</strong>; la confirmación y el descuento de inventario se hacen después con «Confirmar Pedido» (CU-04).
               </div>
             </div>
           }
@@ -120,12 +180,34 @@ import { Modal } from '../../shared/modal/modal';
           <div class="grid-metadatos">
             <div class="meta-item">
               <span class="meta-label">Cliente / Solicitante:</span>
-              <span class="meta-valor cliente-destacado">{{ ped.cliente }}</span>
+              @if (editando()) {
+                <input
+                  type="text"
+                  class="form-control"
+                  [value]="clienteEdicion()"
+                  (input)="onClienteEdicionInput($event)"
+                  placeholder="Nombre del cliente"
+                  maxlength="120"
+                />
+              } @else {
+                <span class="meta-valor cliente-destacado">{{ ped.cliente }}</span>
+              }
             </div>
 
             <div class="meta-item">
               <span class="meta-label">Observaciones:</span>
-              <span class="meta-valor">{{ ped.observacion || 'Sin observaciones' }}</span>
+              @if (editando()) {
+                <input
+                  type="text"
+                  class="form-control"
+                  [value]="observacionEdicion()"
+                  (input)="onObservacionEdicionInput($event)"
+                  placeholder="Observación de entrega (opcional)"
+                  maxlength="300"
+                />
+              } @else {
+                <span class="meta-valor">{{ ped.observacion || 'Sin observaciones' }}</span>
+              }
             </div>
 
             <div class="meta-item">
@@ -159,7 +241,7 @@ import { Modal } from '../../shared/modal/modal';
         <!-- Tabla de Líneas del Pedido -->
         <div class="card-items">
           <div class="items-header">
-            <h2 class="items-titulo">Ítems del Pedido ({{ ped.items?.length || 0 }})</h2>
+            <h2 class="items-titulo">Ítems del Pedido (@if (editando()) { {{ lineasEdicion().length }} } @else { {{ ped.items?.length || 0 }} })</h2>
           </div>
 
           <div class="tabla-wrap">
@@ -171,37 +253,138 @@ import { Modal } from '../../shared/modal/modal';
                   <th style="width: 15%" class="text-right">Precio unitario</th>
                   <th style="width: 12%" class="text-center">Cantidad</th>
                   <th style="width: 18%" class="text-right">Subtotal</th>
+                  @if (editando()) {
+                    <th style="width: 6%" class="text-center">Quitar</th>
+                  }
                 </tr>
               </thead>
               <tbody>
-                @for (item of ped.items; track item.id) {
-                  <tr>
-                    <td>
-                      <span class="codigo-ref font-mono">{{ item.producto?.referencia || '—' }}</span>
-                    </td>
-                    <td>
-                      <div class="prod-nombre">{{ item.producto?.nombre || 'Producto' }}</div>
-                    </td>
-                    <td class="text-right font-mono">
-                      {{ formatearMoneda(item.precio_unitario) }}
-                    </td>
-                    <td class="text-center font-mono font-bold">
-                      {{ item.cantidad }} uds
-                    </td>
-                    <td class="text-right font-mono subtotal-val">
-                      {{ formatearMoneda(item.precio_unitario * item.cantidad) }}
-                    </td>
-                  </tr>
+                @if (editando()) {
+                  @for (linea of lineasEdicion(); track linea.key; let i = $index) {
+                    <tr>
+                      <td>
+                        <span class="codigo-ref font-mono">{{ linea.referencia }}</span>
+                      </td>
+                      <td>
+                        <div class="prod-nombre">{{ linea.nombre }}</div>
+                        <span
+                          class="badge-stock-inline"
+                          [class.stock-cero]="linea.existencias === 0"
+                          [class.stock-bajo]="linea.existencias > 0 && linea.existencias < 10"
+                          [class.stock-ok]="linea.existencias >= 10"
+                        >
+                          Disp. {{ linea.existencias }} uds
+                        </span>
+                      </td>
+                      <td class="text-right font-mono">
+                        {{ formatearMoneda(linea.precio_unitario) }}
+                      </td>
+                      <td class="text-center">
+                        <input
+                          type="number"
+                          class="input-cantidad-edit"
+                          min="1"
+                          step="1"
+                          [value]="linea.cantidad"
+                          (input)="onCantidadEdicionInput(i, $event)"
+                          [class.cantidad-invalida]="linea.cantidad < 1"
+                        />
+                        @if (linea.cantidad < 1) {
+                          <span class="error-msg">Mín. 1</span>
+                        }
+                      </td>
+                      <td class="text-right font-mono subtotal-val">
+                        {{ formatearMoneda(linea.precio_unitario * (linea.cantidad > 0 ? linea.cantidad : 0)) }}
+                      </td>
+                      <td class="text-center">
+                        <button
+                          type="button"
+                          class="btn-quitar-linea"
+                          [disabled]="lineasEdicion().length <= 1"
+                          (click)="quitarLineaEdicion(i)"
+                          aria-label="Quitar línea"
+                          title="Quitar línea"
+                        >
+                          <span class="material-icons">delete_outline</span>
+                        </button>
+                      </td>
+                    </tr>
+                  }
+                } @else {
+                  @for (item of ped.items; track item.id) {
+                    <tr>
+                      <td>
+                        <span class="codigo-ref font-mono">{{ item.producto?.referencia || '—' }}</span>
+                      </td>
+                      <td>
+                        <div class="prod-nombre">{{ item.producto?.nombre || 'Producto' }}</div>
+                      </td>
+                      <td class="text-right font-mono">
+                        {{ formatearMoneda(item.precio_unitario) }}
+                      </td>
+                      <td class="text-center font-mono font-bold">
+                        {{ item.cantidad }} uds
+                      </td>
+                      <td class="text-right font-mono subtotal-val">
+                        {{ formatearMoneda(item.precio_unitario * item.cantidad) }}
+                      </td>
+                    </tr>
+                  }
                 }
               </tbody>
             </table>
           </div>
 
+          <!-- Agregar línea (solo modo edición, CU-09) -->
+          @if (editando()) {
+            <div class="agregar-linea-bar">
+              <select
+                class="form-control select-producto"
+                [value]="productoNuevoId()"
+                (change)="onProductoNuevoChange($event)"
+              >
+                <option value="">Agregar producto...</option>
+                @for (p of productosActivos(); track p.id) {
+                  <option [value]="p.id">
+                    {{ p.nombre }} ({{ p.referencia }}) — disp. {{ p.existencias }}
+                  </option>
+                }
+              </select>
+              <input
+                type="number"
+                class="input-cantidad-edit"
+                min="1"
+                step="1"
+                [value]="cantidadNueva()"
+                (input)="onCantidadNuevaInput($event)"
+                placeholder="Cant."
+                [class.cantidad-invalida]="cantidadNueva() < 1"
+              />
+              <app-boton-cargando
+                [variante]="'secundario'"
+                [tamano]="'md'"
+                [deshabilitado]="!puedeAgregarLinea()"
+                [icono]="'add'"
+                (accionar)="agregarLineaEdicion()"
+              >
+                Agregar línea
+              </app-boton-cargando>
+            </div>
+            @if (!edicionValida()) {
+              <div class="aviso-edicion-invalida">
+                <span class="material-icons">warning_amber</span>
+                {{ motivoEdicionInvalida() }}
+              </div>
+            }
+          }
+
           <!-- Total Final Liquidado -->
           <div class="total-resumen-box">
             <div class="total-bloque">
               <span class="total-etiqueta">Total del Pedido (COP):</span>
-              <span class="total-monto font-mono">{{ formatearMoneda(ped.total) }}</span>
+              <span class="total-monto font-mono">
+                {{ formatearMoneda(editando() ? totalEdicion() : ped.total) }}
+              </span>
             </div>
           </div>
         </div>
@@ -377,6 +560,23 @@ import { Modal } from '../../shared/modal/modal';
       margin-top: 0.35rem;
     }
 
+    .banner-edicion {
+      background: #fffbeb;
+      border-left: 4px solid #d4af37;
+      border-radius: 0.5rem;
+      padding: 0.75rem 1rem;
+      display: flex;
+      align-items: flex-start;
+      gap: 0.625rem;
+      color: #92400e;
+      font-size: 0.875rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .banner-edicion strong {
+      color: #78350f;
+    }
+
     .grid-metadatos {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
@@ -511,6 +711,102 @@ import { Modal } from '../../shared/modal/modal';
       color: #b89326;
     }
 
+    /* Edición de líneas (CU-09) */
+    .input-cantidad-edit {
+      width: 4.5rem;
+      box-sizing: border-box;
+      padding: 0.4rem 0.5rem;
+      border: 1px solid #cbd5e1;
+      border-radius: 0.5rem;
+      font-size: 0.875rem;
+      font-family: inherit;
+      text-align: center;
+      outline: none;
+    }
+    .input-cantidad-edit:focus {
+      border-color: #0f2744;
+      box-shadow: 0 0 0 3px rgba(15, 39, 68, 0.1);
+    }
+    .input-cantidad-edit.cantidad-invalida {
+      border-color: #dc2626;
+      background: #fef2f2;
+    }
+
+    .error-msg {
+      display: block;
+      font-size: 0.6875rem;
+      color: #dc2626;
+      font-weight: 600;
+      margin-top: 0.25rem;
+    }
+
+    .btn-quitar-linea {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 2.25rem;
+      height: 2.25rem;
+      border: 1px solid #fecaca;
+      border-radius: 0.5rem;
+      background: #fef2f2;
+      color: #dc2626;
+      cursor: pointer;
+      transition: background 0.15s ease;
+    }
+    .btn-quitar-linea:hover:not(:disabled) {
+      background: #fee2e2;
+    }
+    .btn-quitar-linea:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+    .btn-quitar-linea .material-icons {
+      font-size: 1.15rem;
+    }
+
+    .agregar-linea-bar {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 1rem 1.75rem;
+      background: #f8fafc;
+      border-top: 1px solid #e2e8f0;
+      flex-wrap: wrap;
+    }
+
+    .select-producto {
+      flex: 1;
+      min-width: 14rem;
+      width: auto;
+    }
+
+    .aviso-edicion-invalida {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.65rem 1.75rem;
+      background: #fef2f2;
+      border-top: 1px solid #fecaca;
+      color: #b91c1c;
+      font-size: 0.8125rem;
+      font-weight: 600;
+    }
+    .aviso-edicion-invalida .material-icons {
+      font-size: 1.1rem;
+    }
+
+    .badge-stock-inline {
+      display: inline-block;
+      font-size: 0.6875rem;
+      font-weight: 700;
+      padding: 0.15rem 0.45rem;
+      border-radius: 0.375rem;
+      margin-top: 0.25rem;
+    }
+    .stock-ok { background: #dcfce7; color: #15803d; }
+    .stock-bajo { background: #fef3c7; color: #b45309; }
+    .stock-cero { background: #fee2e2; color: #b91c1c; }
+
     /* Modal Cancelar */
     .alerta-cancelar {
       margin: 0 0 1rem 0;
@@ -641,6 +937,7 @@ import { Modal } from '../../shared/modal/modal';
 })
 export class PedidoDetalleComponent implements OnInit {
   private readonly pedidoService = inject(PedidoService);
+  private readonly productoService = inject(ProductoService);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly toast = inject(ToastService);
@@ -655,6 +952,52 @@ export class PedidoDetalleComponent implements OnInit {
   readonly controlMotivo = new FormControl<string>('', {
     nonNullable: true,
     validators: [Validators.required, Validators.minLength(3)]
+  });
+
+  // Modo edición de líneas (CU-09)
+  readonly editando = signal<boolean>(false);
+  readonly lineasEdicion = signal<LineaEdicion[]>([]);
+  readonly clienteEdicion = signal<string>('');
+  readonly observacionEdicion = signal<string>('');
+  readonly productosActivos = signal<Producto[]>([]);
+  readonly productoNuevoId = signal<string>('');
+  readonly cantidadNueva = signal<number>(1);
+
+  /** Total recalculado en vivo mientras se edita. */
+  readonly totalEdicion = computed(() =>
+    this.lineasEdicion().reduce(
+      (suma, l) => suma + l.precio_unitario * (l.cantidad > 0 ? l.cantidad : 0),
+      0
+    )
+  );
+
+  /** Valida el formulario de edición completo. */
+  readonly edicionValida = computed(() => {
+    if (this.clienteEdicion().trim().length === 0) return false;
+    const lineas = this.lineasEdicion();
+    if (lineas.length === 0) return false;
+    return lineas.every(l => Number.isInteger(l.cantidad) && l.cantidad >= 1);
+  });
+
+  /** Mensaje del motivo por el cual la edición no es válida. */
+  readonly motivoEdicionInvalida = computed(() => {
+    if (this.clienteEdicion().trim().length === 0) {
+      return 'El nombre del cliente es obligatorio.';
+    }
+    if (this.lineasEdicion().length === 0) {
+      return 'El pedido debe tener al menos una línea.';
+    }
+    if (this.lineasEdicion().some(l => !Number.isInteger(l.cantidad) || l.cantidad < 1)) {
+      return 'Hay líneas con cantidad inválida: la cantidad debe ser al menos 1.';
+    }
+    return '';
+  });
+
+  /** Habilita «Agregar línea» solo con producto y cantidad válidos. */
+  readonly puedeAgregarLinea = computed(() => {
+    if (this.productoNuevoId().length === 0) return false;
+    const cant = this.cantidadNueva();
+    return Number.isInteger(cant) && cant >= 1;
   });
 
   ngOnInit(): void {
@@ -708,6 +1051,138 @@ export class PedidoDetalleComponent implements OnInit {
     } finally {
       this.procesandoAccion.set(false);
     }
+  }
+
+  // ─────────────────────────────────────────────────────────────
+  // Modo edición de un pedido pendiente (CU-09)
+  // ─────────────────────────────────────────────────────────────
+
+  /** Entra en modo edición: carga líneas actuales y el catálogo de productos activos. */
+  async iniciarEdicion(): Promise<void> {
+    const ped = this.pedido();
+    if (!ped || ped.estado !== 'pendiente' || this.editando()) return;
+
+    this.lineasEdicion.set(
+      (ped.items ?? []).map(it => ({
+        key: it.id,
+        producto_id: it.producto_id,
+        cantidad: it.cantidad,
+        precio_unitario: it.precio_unitario,
+        nombre: it.producto?.nombre || 'Producto',
+        referencia: it.producto?.referencia || '—',
+        existencias: it.producto?.existencias ?? 0
+      }))
+    );
+    this.clienteEdicion.set(ped.cliente);
+    this.observacionEdicion.set(ped.observacion ?? '');
+    this.productoNuevoId.set('');
+    this.cantidadNueva.set(1);
+
+    try {
+      const productos = await this.productoService.listar(undefined, true);
+      this.productosActivos.set(productos);
+    } catch {
+      this.productosActivos.set([]);
+      this.toast.advertencia(
+        'No se pudo cargar el catálogo de productos para agregar líneas.',
+        'Catálogo no disponible'
+      );
+    }
+
+    this.editando.set(true);
+  }
+
+  /** Sale del modo edición descartando los cambios. */
+  cancelarEdicion(): void {
+    if (this.procesandoAccion()) return;
+    this.editando.set(false);
+    this.lineasEdicion.set([]);
+  }
+
+  /**
+   * Guarda los cambios con la RPC editar_pedido.
+   * El pedido sigue PENDIENTE: la confirmación y el descuento de
+   * inventario se hacen después con «Confirmar Pedido» (CU-04).
+   */
+  async guardarEdicion(): Promise<void> {
+    const ped = this.pedido();
+    if (!ped || !this.editando() || !this.edicionValida() || this.procesandoAccion()) return;
+
+    this.procesandoAccion.set(true);
+    try {
+      await this.pedidoService.editarPedido(
+        ped.id,
+        this.clienteEdicion(),
+        this.lineasEdicion().map(l => ({ producto_id: l.producto_id, cantidad: l.cantidad })),
+        this.observacionEdicion()
+      );
+      this.toast.exito(
+        'Pedido actualizado. Sigue pendiente: revisa las líneas y pulsa «Confirmar Pedido» cuando el inventario alcance.',
+        'Cambios guardados'
+      );
+      this.editando.set(false);
+      this.lineasEdicion.set([]);
+      await this.cargarDetalle(ped.id);
+    } catch (err: unknown) {
+      const appErr = mapError(err);
+      this.toast.error(appErr.mensaje, appErr.titulo);
+    } finally {
+      this.procesandoAccion.set(false);
+    }
+  }
+
+  onClienteEdicionInput(event: Event): void {
+    this.clienteEdicion.set((event.target as HTMLInputElement).value);
+  }
+
+  onObservacionEdicionInput(event: Event): void {
+    this.observacionEdicion.set((event.target as HTMLInputElement).value);
+  }
+
+  onCantidadEdicionInput(index: number, event: Event): void {
+    const raw = (event.target as HTMLInputElement).value;
+    const valor = raw === '' ? 0 : Math.floor(Number(raw));
+    this.lineasEdicion.update(lineas =>
+      lineas.map((l, i) => (i === index ? { ...l, cantidad: Number.isFinite(valor) ? valor : 0 } : l))
+    );
+  }
+
+  quitarLineaEdicion(index: number): void {
+    if (this.lineasEdicion().length <= 1) return;
+    this.lineasEdicion.update(lineas => lineas.filter((_, i) => i !== index));
+  }
+
+  onProductoNuevoChange(event: Event): void {
+    this.productoNuevoId.set((event.target as HTMLSelectElement).value);
+  }
+
+  onCantidadNuevaInput(event: Event): void {
+    const raw = (event.target as HTMLInputElement).value;
+    const valor = raw === '' ? 0 : Math.floor(Number(raw));
+    this.cantidadNueva.set(Number.isFinite(valor) ? valor : 0);
+  }
+
+  /** Agrega una línea al pedido en edición (no se guarda hasta «Confirmar cambios»). */
+  agregarLineaEdicion(): void {
+    if (!this.puedeAgregarLinea()) return;
+
+    const producto = this.productosActivos().find(p => p.id === this.productoNuevoId());
+    if (!producto) return;
+
+    this.lineasEdicion.update(lineas => [
+      ...lineas,
+      {
+        key: `nueva-${Date.now()}-${lineas.length}`,
+        producto_id: producto.id,
+        cantidad: this.cantidadNueva(),
+        precio_unitario: producto.precio,
+        nombre: producto.nombre,
+        referencia: producto.referencia,
+        existencias: producto.existencias
+      }
+    ]);
+    this.productoNuevoId.set('');
+    this.cantidadNueva.set(1);
   }
 
   async despachar(): Promise<void> {
