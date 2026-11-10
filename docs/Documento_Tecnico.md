@@ -182,6 +182,7 @@ La guía exige **distinguir los hechos de las hipótesis**. Los hechos son datos
 - **Pagos reales**, facturación fiscal, contabilidad y logística avanzada.
 - Aplicación **móvil nativa** (opcional en la guía y sin puntos adicionales por sí sola).
 - **Autenticación y permisos diferenciados** en esta versión: la matriz de roles del apartado 5.7 es **propuesta documental**, no una funcionalidad implementada (RF-08: autenticación y permisos, prioridad Could).
+- **Auditoría (bitácora de cambios):** no se implementa en esta versión; la tabla `auditoria` y sus disparadores se retiraron con la migración `0008` por decisión del equipo y quedan como mejora futura (5.10.2).
 - Multicompañía, catálogo multimoneda, venta al detal con precios por cantidad, notificaciones automáticas y modo sin conexión.
 
 ### 5.3.5 Supuestos y dependencias
@@ -471,7 +472,7 @@ En este sistema **el inventario no es un módulo separado: es la columna `existe
 | pedido_items | tabla `pedido_items` | `id, pedido_id, producto_id, cantidad > 0, precio_unitario > 0` + claves foráneas con borrado en cascada | ✅ Desplegada |
 | Restricciones | `CHECK`, `UNIQUE`, claves foráneas y disparadores | cantidades > 0, precios > 0 y existencias ≥ 0, estados válidos; disparadores `fn_pedidos_transicion()` y `fn_actualizar_en()` | ✅ Activas |
 | Lógica de negocio | RPC `crear_pedido()`, `confirmar_pedido()`, `despachar_pedido()`, `cancelar_pedido()`, `resumen_por_estado()` | funciones transaccionales (`security definer`) con bloqueo de fila y errores tipados (`INVENTARIO_INSUFICIENTE`, `TRANSICION_INVALIDA`, `MOTIVO_REQUERIDO`, …); la web invoca `crear_pedido()` y seguidamente `confirmar_pedido()` (**confirmación automática al registrar**, flujo To-Be de 5.2) | ✅ Desplegadas |
-| Bitácora interna (mecanismo técnico, sin interfaz) | tabla `auditoria` + disparadores | registro automático de cada escritura con valores anteriores y posteriores; soporta las métricas de 5.9 | ✅ Activa |
+| Bitácora interna (mecanismo técnico, sin interfaz) | tabla `auditoria` + disparadores | registro automático de cada escritura con valores anteriores y posteriores; soporta las métricas de 5.9 | ❌ Retirada: eliminada con la migración `0008` por decisión del equipo; queda como mejora futura (5.10.2) |
 
 > **Nota de honestidad (requerida por la guía):** esta tabla refleja el sistema **realmente desplegado** en Supabase; la verificación funcional está en 5.8 y el balance en 5.10.
 
@@ -516,7 +517,8 @@ La autenticación por roles **no es obligatoria** en esta versión (RF-08: auten
 | Descuento único de existencias en transacción única | **Autorización por fila (RLS) y permisos de columna por disparador** |
 | Máquina de estados con transiciones validadas en servidor (estados coherentes) | Alertas de inventario mínimo y notificación al cliente |
 | Persistencia en servidor, misma fuente para escritorio y móvil | Copias de respaldo programadas y restauración probada |
-| Bitácora/auditoría de cambios (mecanismo técnico, sin interfaz) | Integración con la API de WhatsApp para avisos automáticos |
+| Confirmación automática al registrar el pedido cuando el inventario alcanza (To-Be) | Integración con la API de WhatsApp para avisos automáticos |
+| | **Bitácora/auditoría de cambios** (tabla `auditoria`; retirada con la migración `0008`, ver 5.10.2) |
 
 > **Nota de honestidad:** la columna izquierda está construida y se verifica en el apartado 5.8; la columna derecha queda explícitamente fuera del alcance de esta versión (autenticación: prioridad Could, ver exclusiones de 5.3.4).
 
@@ -538,7 +540,7 @@ La matriz siguiente es la **única** evidencia de pruebas del documento; usa los
 
 ## 5.9 Métricas de éxito
 
-Tres indicadores para evaluar el sistema en uso. El sistema ya registra las marcas de tiempo y la bitácora necesarias para medirlos; mientras no haya operación real, se mantienen como metas hipotéticas sobre la línea base didáctica.
+Tres indicadores para evaluar el sistema en uso. El sistema ya registra las marcas de tiempo necesarias para medirlos; la bitácora de auditoría prevista para los ajustes manuales quedó fuera de esta versión (5.10.2). Mientras no haya operación real, se mantienen como metas hipotéticas sobre la línea base didáctica.
 
 | # | Indicador | Definición | Cómo medirlo | Línea base didáctica (caso) | Meta hipotética |
 |---|---|---|---|---|---|
@@ -567,6 +569,7 @@ Tres indicadores para evaluar el sistema en uso. El sistema ya registra las marc
 ### 5.10.2 Qué quedó pendiente
 
 - **RF-08 (autenticación y permisos diferenciados, Could): no implementado** en esta versión; su matriz queda documentada como propuesta en 5.7.1.
+- **Bitácora de auditoría (tabla `auditoria`): eliminada** con la migración `0008` por decisión del equipo (esta versión no lleva auditorías); queda anotada como mejora futura (5.3.4 y 5.6.4).
 - Los demás controles de la columna derecha del apartado 5.7.3 (alertas de inventario mínimo, notificaciones al cliente, respaldos con restauración probada, integración con la API de WhatsApp).
 - Publicación de la aplicación para acceso fuera del aula (si el tiempo lo permite).
 
@@ -578,4 +581,4 @@ Tres indicadores para evaluar el sistema en uso. El sistema ya registra las marc
 
 ### 5.10.4 Mejora futura priorizada
 
-**Autenticación por roles (RF-08) y, en segundo lugar, alertas de inventario mínimo.** Con las cinco reglas de negocio y la bitácora técnica ya implementadas, la mejora con mejor relación impacto-esfuerzo es implementar la sesión con roles de la matriz propuesta de 5.7 (cierre del riesgo R-2), y sobre esa base añadir avisos al vendedor cuando un producto baja del mínimo y la confirmación del pedido por WhatsApp, apoyándose en las marcas de tiempo y la bitácora de 5.6.4 para medir las métricas M-2 y M-3 sin depender de registros manuales.
+**Autenticación por roles (RF-08) y, en segundo lugar, alertas de inventario mínimo.** Con las cinco reglas de negocio ya implementadas, la mejora con mejor relación impacto-esfuerzo es implementar la sesión con roles de la matriz propuesta de 5.7 (cierre del riesgo R-2), y sobre esa base añadir avisos al vendedor cuando un producto baja del mínimo y la confirmación del pedido por WhatsApp, apoyándose en las marcas de tiempo existentes y, cuando se reincorpore, en la bitácora de auditoría prevista en 5.10.2 para medir las métricas M-2 y M-3 sin depender de registros manuales.

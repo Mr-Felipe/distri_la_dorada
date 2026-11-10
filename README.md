@@ -7,7 +7,7 @@ Sistema web para gestionar pedidos e inventario de una distribuidora de alimento
 | Carpeta | Contenido |
 |---|---|
 | `frontend/` | Aplicación Angular 21 (standalone, signals, reactive forms) + Supabase JS |
-| `supabase/migrations/` | Esquema SQL, RLS, RPCs de negocio, auditoría, seed y apertura web (0001 → 0006) |
+| `supabase/migrations/` | Esquema SQL, RLS, RPCs de negocio, seed, apertura web y retiro de la auditoría (0001 → 0008) |
 | `docs/` | Documento técnico, **PROYECTO FINAL INTEGRADOR** (md/html/docx) y diagramas PlantUML |
 | `PLAN.md` | Plan de trabajo del equipo |
 
@@ -23,9 +23,13 @@ Aplica las migraciones **en orden** desde el SQL Editor de Supabase:
 1. `0001_esquema_base.sql` — tablas, secuencia de números de pedido, grants
 2. `0002_rls_politicas.sql` — políticas RLS
 3. `0003_rpc_reglas_negocio.sql` — `crear_pedido`, `confirmar_pedido`, `despachar_pedido`, `cancelar_pedido`, `resumen_por_estado`
-4. `0004_auditoria_triggers.sql` — auditoría
+4. `0004_auditoria_triggers.sql` — auditoría (creada aquí; retirada en `0008`)
 5. `0005_seed.sql` — datos de prueba (productos de ejemplo)
 6. `0006_web_abierta_sin_login.sql` — abre la app sin autenticación
+7. `0007_precio_mayor_cero.sql` — precios de producto mayores que 0
+8. `0008_eliminar_auditoria.sql` — retira la bitácora `auditoria` (decisión del equipo; queda como mejora futura)
+
+> **Sin auditorías:** esta versión no lleva bitácora de cambios. La tabla `auditoria`, su función `fn_auditar()` y sus tres disparadores fueron eliminados en `0008`; la mejora queda anotada en el documento técnico (5.10.2).
 
 ## Frontend
 

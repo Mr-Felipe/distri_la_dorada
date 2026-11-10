@@ -863,6 +863,7 @@ hr { border: none; border-top: 1px solid #bbb; margin: 14pt 0; }
 <li><strong>Pagos reales</strong>, facturación fiscal, contabilidad y logística avanzada.</li>
 <li>Aplicación <strong>móvil nativa</strong> (opcional en la guía y sin puntos adicionales por sí sola).</li>
 <li><strong>Autenticación y permisos diferenciados</strong> en esta versión: la matriz de roles del apartado 5.7 es <strong>propuesta documental</strong>, no una funcionalidad implementada (RF-08: autenticación y permisos, prioridad Could).</li>
+<li><strong>Auditoría (bitácora de cambios):</strong> no se implementa en esta versión; la tabla <code>auditoria</code> y sus disparadores se retiraron con la migración <code>0008</code> por decisión del equipo y quedan como mejora futura (5.10.2).</li>
 <li>Multicompañía, catálogo multimoneda, venta al detal con precios por cantidad, notificaciones automáticas y modo sin conexión.</li>
 </ul>
 <h3>5.3.5 Supuestos y dependencias</h3>
@@ -1667,7 +1668,7 @@ hr { border: none; border-top: 1px solid #bbb; margin: 14pt 0; }
 <td>Bitácora interna (mecanismo técnico, sin interfaz)</td>
 <td>tabla <code>auditoria</code> + disparadores</td>
 <td>registro automático de cada escritura con valores anteriores y posteriores; soporta las métricas de 5.9</td>
-<td>✅ Activa</td>
+<td>❌ Retirada: eliminada con la migración <code>0008</code> por decisión del equipo; queda como mejora futura (5.10.2)</td>
 </tr>
 </tbody>
 </table>
@@ -1813,8 +1814,12 @@ hr { border: none; border-top: 1px solid #bbb; margin: 14pt 0; }
 <td>Copias de respaldo programadas y restauración probada</td>
 </tr>
 <tr>
-<td>Bitácora/auditoría de cambios (mecanismo técnico, sin interfaz)</td>
+<td>Confirmación automática al registrar el pedido cuando el inventario alcanza (To-Be)</td>
 <td>Integración con la API de WhatsApp para avisos automáticos</td>
+</tr>
+<tr>
+<td></td>
+<td><strong>Bitácora/auditoría de cambios</strong> (tabla <code>auditoria</code>; retirada con la migración <code>0008</code>, ver 5.10.2)</td>
 </tr>
 </tbody>
 </table>
@@ -1869,7 +1874,7 @@ hr { border: none; border-top: 1px solid #bbb; margin: 14pt 0; }
 </table>
 <p><strong>Criterio de aprobación de la matriz:</strong> los tres resultados obtenidos coinciden con los esperados; cualquier desviación se documenta en el apartado 5.10 como limitación, sin crear un informe de pruebas adicional.</p>
 <h2>5.9 Métricas de éxito</h2>
-<p>Tres indicadores para evaluar el sistema en uso. El sistema ya registra las marcas de tiempo y la bitácora necesarias para medirlos; mientras no haya operación real, se mantienen como metas hipotéticas sobre la línea base didáctica.</p>
+<p>Tres indicadores para evaluar el sistema en uso. El sistema ya registra las marcas de tiempo necesarias para medirlos; la bitácora de auditoría prevista para los ajustes manuales quedó fuera de esta versión (5.10.2). Mientras no haya operación real, se mantienen como metas hipotéticas sobre la línea base didáctica.</p>
 <table>
 <thead>
 <tr>
@@ -1955,6 +1960,7 @@ hr { border: none; border-top: 1px solid #bbb; margin: 14pt 0; }
 <h3>5.10.2 Qué quedó pendiente</h3>
 <ul>
 <li><strong>RF-08 (autenticación y permisos diferenciados, Could): no implementado</strong> en esta versión; su matriz queda documentada como propuesta en 5.7.1.</li>
+<li><strong>Bitácora de auditoría (tabla <code>auditoria</code>): eliminada</strong> con la migración <code>0008</code> por decisión del equipo (esta versión no lleva auditorías); queda anotada como mejora futura (5.3.4 y 5.6.4).</li>
 <li>Los demás controles de la columna derecha del apartado 5.7.3 (alertas de inventario mínimo, notificaciones al cliente, respaldos con restauración probada, integración con la API de WhatsApp).</li>
 <li>Publicación de la aplicación para acceso fuera del aula (si el tiempo lo permite).</li>
 </ul>
@@ -1965,6 +1971,6 @@ hr { border: none; border-top: 1px solid #bbb; margin: 14pt 0; }
 <li>La integración con WhatsApp queda limitada a recibir el pedido de forma manual; no hay notificaciones automáticas al cliente.</li>
 </ul>
 <h3>5.10.4 Mejora futura priorizada</h3>
-<p><strong>Autenticación por roles (RF-08) y, en segundo lugar, alertas de inventario mínimo.</strong> Con las cinco reglas de negocio y la bitácora técnica ya implementadas, la mejora con mejor relación impacto-esfuerzo es implementar la sesión con roles de la matriz propuesta de 5.7 (cierre del riesgo R-2), y sobre esa base añadir avisos al vendedor cuando un producto baja del mínimo y la confirmación del pedido por WhatsApp, apoyándose en las marcas de tiempo y la bitácora de 5.6.4 para medir las métricas M-2 y M-3 sin depender de registros manuales.</p>
+<p><strong>Autenticación por roles (RF-08) y, en segundo lugar, alertas de inventario mínimo.</strong> Con las cinco reglas de negocio ya implementadas, la mejora con mejor relación impacto-esfuerzo es implementar la sesión con roles de la matriz propuesta de 5.7 (cierre del riesgo R-2), y sobre esa base añadir avisos al vendedor cuando un producto baja del mínimo y la confirmación del pedido por WhatsApp, apoyándose en las marcas de tiempo existentes y, cuando se reincorpore, en la bitácora de auditoría prevista en 5.10.2 para medir las métricas M-2 y M-3 sin depender de registros manuales.</p>
 </body>
 </html>
