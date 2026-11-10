@@ -76,132 +76,74 @@ import { Modal } from '../../shared/modal/modal';
       [iconoVacio]="'inventory_2'"
       (reintentar)="cargarProductos()"
     >
-      <!-- Vista Desktop / Tablet: Tabla Estructurada -->
-      <table class="tabla-dorada desktop-only">
-        <thead>
-          <tr>
-            <th style="width: 15%">Referencia</th>
-            <th style="width: 35%">Producto</th>
-            <th style="width: 15%" class="text-right">Precio COP</th>
-            <th style="width: 15%" class="text-center">Existencias</th>
-            <th style="width: 10%" class="text-center">Estado</th>
-            <th style="width: 10%" class="text-right">Acciones</th>
-          </tr>
-        </thead>
-        <tbody>
-          @for (prod of productosFiltrados(); track prod.id) {
-            <tr [class.fila-inactiva]="!prod.activo">
-              <td>
-                <span class="codigo-ref">{{ prod.referencia }}</span>
-              </td>
-              <td>
-                <div class="nombre-producto">{{ prod.nombre }}</div>
-              </td>
-              <td class="text-right font-mono valor-precio">
-                {{ formatearMoneda(prod.precio) }}
-              </td>
-              <td class="text-center">
-                <span
-                  class="badge-stock"
-                  [class]="obtenerClaseStock(prod.existencias)"
-                  [title]="prod.existencias + ' unidades físicas disponibles'"
-                >
-                  <span class="stock-num">{{ prod.existencias }}</span>
-                  <span class="stock-unidad">uds</span>
-                </span>
-              </td>
-              <td class="text-center">
-                @if (prod.activo) {
-                  <span class="badge-activo">Activo</span>
-                } @else {
-                  <span class="badge-inactivo">Inactivo</span>
-                }
-              </td>
-              <td class="text-right">
-                <div class="acciones-fila">
-                  <button
-                    type="button"
-                    class="btn-accion-icono btn-ajustar"
-                    (click)="abrirModalStock(prod)"
-                    title="Ajustar existencias físicas"
-                  >
-                    <span class="material-icons">swap_vert</span>
-                  </button>
+    <!-- Vista de Tarjetas: 3 por fila (desktop), responsive a 2 y 1 -->
+    <div class="grid-productos">
+      @for (prod of productosFiltrados(); track prod.id) {
+        <article class="tarjeta-producto" [class.tarjeta-inactiva]="!prod.activo">
+          <div class="tarjeta-header">
+            <span class="codigo-ref">{{ prod.referencia }}</span>
+            @if (prod.activo) {
+              <span class="badge-activo">Activo</span>
+            } @else {
+              <span class="badge-inactivo">Inactivo</span>
+            }
+          </div>
 
-                  <a
-                    [routerLink]="['/catalogo', prod.id]"
-                    class="btn-accion-icono"
-                    title="Editar información del producto"
-                  >
-                    <span class="material-icons">edit</span>
-                  </a>
+          <h3 class="tarjeta-nombre">{{ prod.nombre }}</h3>
 
-                  <button
-                    type="button"
-                    class="btn-accion-icono"
-                    [class.btn-activar]="!prod.activo"
-                    [class.btn-desactivar]="prod.activo"
-                    (click)="confirmarAlternarActivo(prod)"
-                    [title]="prod.activo ? 'Desactivar producto' : 'Activar producto'"
-                  >
-                    <span class="material-icons">{{ prod.activo ? 'toggle_on' : 'toggle_off' }}</span>
-                  </button>
-                </div>
-              </td>
-            </tr>
-          }
-        </tbody>
-      </table>
-
-      <!-- Vista Móvil: Tarjetas Apiladas (Responsive) -->
-      <div class="tarjetas-movil mobile-only">
-        @for (prod of productosFiltrados(); track prod.id) {
-          <div class="tarjeta-producto" [class.tarjeta-inactiva]="!prod.activo">
-            <div class="tarjeta-header">
-              <span class="codigo-ref">{{ prod.referencia }}</span>
-              @if (prod.activo) {
-                <span class="badge-activo">Activo</span>
-              } @else {
-                <span class="badge-inactivo">Inactivo</span>
-              }
+          <div class="tarjeta-detalles">
+            <div class="detalle-col">
+              <span class="detalle-label">Precio:</span>
+              <span class="detalle-valor font-mono">{{ formatearMoneda(prod.precio) }}</span>
             </div>
-
-            <h3 class="tarjeta-nombre">{{ prod.nombre }}</h3>
-
-            <div class="tarjeta-detalles">
-              <div class="detalle-col">
-                <span class="detalle-label">Precio:</span>
-                <span class="detalle-valor font-mono">{{ formatearMoneda(prod.precio) }}</span>
-              </div>
-              <div class="detalle-col">
-                <span class="detalle-label">Stock:</span>
-                <span class="badge-stock" [class]="obtenerClaseStock(prod.existencias)">
-                  {{ prod.existencias }} uds
-                </span>
-              </div>
-            </div>
-
-            <div class="tarjeta-acciones">
-              <button
-                type="button"
-                class="btn-movil-accion"
-                (click)="abrirModalStock(prod)"
+            <div class="detalle-col detalle-col-derecha">
+              <span class="detalle-label">Existencias:</span>
+              <span
+                class="badge-stock"
+                [class]="obtenerClaseStock(prod.existencias)"
+                [title]="prod.existencias + ' unidades físicas disponibles'"
               >
-                <span class="material-icons">swap_vert</span>
-                Ajustar Stock
-              </button>
-
-              <a
-                [routerLink]="['/catalogo', prod.id]"
-                class="btn-movil-accion btn-movil-edit"
-              >
-                <span class="material-icons">edit</span>
-                Editar
-              </a>
+                <span class="stock-num">{{ prod.existencias }}</span>
+                <span class="stock-unidad">uds</span>
+              </span>
             </div>
           </div>
-        }
-      </div>
+
+          <div class="tarjeta-acciones">
+            <button
+              type="button"
+              class="btn-accion-tarjeta btn-ajustar"
+              (click)="abrirModalStock(prod)"
+              title="Ajustar existencias físicas"
+            >
+              <span class="material-icons">swap_vert</span>
+              Ajustar stock
+            </button>
+
+            <a
+              [routerLink]="['/catalogo', prod.id]"
+              class="btn-accion-tarjeta btn-editar-tarjeta"
+              title="Editar información del producto"
+            >
+              <span class="material-icons">edit</span>
+              Editar
+            </a>
+
+            <button
+              type="button"
+              class="btn-accion-tarjeta"
+              [class.btn-activar]="!prod.activo"
+              [class.btn-desactivar]="prod.activo"
+              (click)="confirmarAlternarActivo(prod)"
+              [title]="prod.activo ? 'Desactivar producto' : 'Activar producto'"
+            >
+              <span class="material-icons">{{ prod.activo ? 'toggle_on' : 'toggle_off' }}</span>
+              {{ prod.activo ? 'Desactivar' : 'Activar' }}
+            </button>
+          </div>
+        </article>
+      }
+    </div>
     </app-tabla-responsiva>
 
     <!-- Modal para Ajuste Rápido de Existencias (Bodega / Admin) -->
@@ -379,39 +321,74 @@ import { Modal } from '../../shared/modal/modal';
       user-select: none;
     }
 
-    /* Tabla Estructurada Propia */
-    .tabla-dorada {
-      width: 100%;
-      border-collapse: collapse;
-      text-align: left;
+    /* Grid de Tarjetas de Productos (3 por fila) */
+    .grid-productos {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 1rem;
+      padding: 1.25rem;
     }
 
-    .tabla-dorada th {
-      background: #f8fafc;
-      padding: 0.875rem 1.25rem;
-      font-size: 0.75rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      color: #475569;
-      border-bottom: 1px solid #e2e8f0;
-      user-select: none;
+    .tarjeta-producto {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 0.75rem;
+      padding: 1rem;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+      display: flex;
+      flex-direction: column;
+      transition: box-shadow 0.15s, transform 0.15s;
+    }
+    .tarjeta-producto:hover {
+      box-shadow: 0 4px 12px rgba(15, 39, 68, 0.08);
+      transform: translateY(-2px);
     }
 
-    .tabla-dorada td {
-      padding: 1rem 1.25rem;
-      border-bottom: 1px solid #f1f5f9;
-      font-size: 0.875rem;
-      color: #1e293b;
-      vertical-align: middle;
-    }
-
-    .tabla-dorada tr:hover td {
-      background-color: #f8fafc;
-    }
-
-    .fila-inactiva td {
+    .tarjeta-inactiva {
       opacity: 0.6;
+    }
+
+    .tarjeta-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .tarjeta-nombre {
+      margin: 0 0 0.75rem 0;
+      font-size: 1rem;
+      font-weight: 700;
+      color: #0f2744;
+    }
+
+    .tarjeta-detalles {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      gap: 0.75rem;
+      background: #f8fafc;
+      border-radius: 0.5rem;
+      padding: 0.625rem 0.875rem;
+      margin-bottom: 0.875rem;
+    }
+
+    .detalle-col-derecha {
+      text-align: right;
+    }
+
+    .detalle-label {
+      display: block;
+      font-size: 0.75rem;
+      color: #64748b;
+      margin-bottom: 0.125rem;
+    }
+
+    .detalle-valor {
+      font-size: 0.9375rem;
+      font-weight: 700;
+      color: #0f2744;
     }
 
     .codigo-ref {
@@ -424,16 +401,6 @@ import { Modal } from '../../shared/modal/modal';
       padding: 0.2rem 0.5rem;
       border-radius: 0.375rem;
       border: 1px solid #e2e8f0;
-    }
-
-    .nombre-producto {
-      font-weight: 600;
-      color: #0f2744;
-    }
-
-    .valor-precio {
-      font-weight: 700;
-      color: #0f2744;
     }
 
     /* Badges de Existencias (§8) */
@@ -492,33 +459,50 @@ import { Modal } from '../../shared/modal/modal';
       font-weight: 600;
     }
 
-    .acciones-fila {
+    .tarjeta-acciones {
       display: flex;
-      align-items: center;
-      justify-content: flex-end;
-      gap: 0.375rem;
+      gap: 0.5rem;
+      margin-top: auto;
     }
 
-    .btn-accion-icono {
-      background: transparent;
-      border: 1px solid transparent;
-      color: #64748b;
-      padding: 0.375rem;
-      border-radius: 0.375rem;
-      cursor: pointer;
+    .btn-accion-tarjeta {
+      flex: 1;
+      min-width: 0;
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      transition: all 0.15s ease;
-      text-decoration: none;
-    }
-    .btn-accion-icono:hover {
+      gap: 0.375rem;
       background: #f1f5f9;
       color: #0f2744;
-      border-color: #cbd5e1;
+      border: 1px solid #cbd5e1;
+      padding: 0.5rem 0.375rem;
+      border-radius: 0.5rem;
+      font-size: 0.8125rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      white-space: nowrap;
+      overflow: hidden;
+      transition: all 0.15s ease;
     }
-    .btn-accion-icono .material-icons {
-      font-size: 1.25rem;
+    .btn-accion-tarjeta .material-icons {
+      font-size: 1.1rem;
+    }
+    .btn-accion-tarjeta:hover {
+      background: #e2e8f0;
+      color: #0f2744;
+      border-color: #94a3b8;
+    }
+
+    .btn-editar-tarjeta {
+      background: #0f2744;
+      color: #ffffff;
+      border-color: #0f2744;
+    }
+    .btn-editar-tarjeta:hover {
+      background: #16365c;
+      color: #ffffff;
+      border-color: #16365c;
     }
 
     .btn-ajustar {
@@ -605,98 +589,22 @@ import { Modal } from '../../shared/modal/modal';
       justify-content: flex-end;
     }
 
-    /* Tarjetas Móvil */
-    .desktop-only {
-      display: table;
-    }
-    .mobile-only {
-      display: none;
+    /* Responsive del grid de tarjetas */
+    @media (max-width: 1100px) {
+      .grid-productos {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
     }
 
     @media (max-width: 768px) {
-      .desktop-only {
-        display: none !important;
-      }
-      .mobile-only {
-        display: flex !important;
-        flex-direction: column;
-        gap: 0.875rem;
+      .grid-productos {
+        grid-template-columns: 1fr;
         padding: 0.875rem;
-      }
-
-      .tarjeta-producto {
-        background: #ffffff;
-        border: 1px solid #e2e8f0;
-        border-radius: 0.75rem;
-        padding: 1rem;
-        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
-      }
-
-      .tarjeta-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 0.5rem;
-      }
-
-      .tarjeta-nombre {
-        margin: 0 0 0.75rem 0;
-        font-size: 1rem;
-        font-weight: 700;
-        color: #0f2744;
-      }
-
-      .tarjeta-detalles {
-        display: flex;
-        justify-content: space-between;
-        background: #f8fafc;
-        border-radius: 0.5rem;
-        padding: 0.625rem 0.875rem;
-        margin-bottom: 0.875rem;
-      }
-
-      .detalle-label {
-        display: block;
-        font-size: 0.75rem;
-        color: #64748b;
-        margin-bottom: 0.125rem;
-      }
-
-      .detalle-valor {
-        font-size: 0.9375rem;
-        font-weight: 700;
-        color: #0f2744;
+        gap: 0.875rem;
       }
 
       .tarjeta-acciones {
-        display: flex;
-        gap: 0.5rem;
-      }
-
-      .btn-movil-accion {
-        flex: 1;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        gap: 0.375rem;
-        background: #f1f5f9;
-        color: #0f2744;
-        border: 1px solid #cbd5e1;
-        padding: 0.5rem;
-        border-radius: 0.5rem;
-        font-size: 0.8125rem;
-        font-weight: 600;
-        cursor: pointer;
-        text-decoration: none;
-      }
-      .btn-movil-accion .material-icons {
-        font-size: 1.1rem;
-      }
-
-      .btn-movil-edit {
-        background: #0f2744;
-        color: #ffffff;
-        border-color: #0f2744;
+        flex-wrap: wrap;
       }
     }
 

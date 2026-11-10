@@ -503,7 +503,7 @@ hr { border: none; border-top: 1px solid #bbb; margin: 14pt 0; }
 <td>RF-01</td>
 <td>Consultar productos, precios y existencias</td>
 <td><strong>Must</strong></td>
-<td>Desde el listado se ven referencia/nombre, precio y existencias de cada producto; la consulta funciona tras cerrar y reabrir la aplicación</td>
+<td>El catálogo se presenta en <strong>tarjetas (3 por fila en desktop, responsive a 2 y 1)</strong> con referencia/nombre, precio, existencias, estado y acciones de cada producto; la consulta funciona tras cerrar y reabrir la aplicación</td>
 </tr>
 <tr>
 <td>RF-02</td>
@@ -814,7 +814,7 @@ hr { border: none; border-top: 1px solid #bbb; margin: 14pt 0; }
 </tr>
 <tr>
 <td><strong>Flujo principal</strong></td>
-<td>1. El actor abre la pantalla de catálogo.<br>2. El sistema lista los productos con referencia, nombre, precio y existencias.<br>3. El actor (opcional) escribe parte del nombre o la referencia para buscar (RF-10).<br>4. El sistema filtra la lista y muestra los coincidentes.<br>5. El actor revisa la información; al salir, el sistema no cambia nada.</td>
+<td>1. El actor abre la pantalla de catálogo.<br>2. El sistema presenta los productos en <strong>tarjetas de 3 por fila</strong> (desktop; 2 y 1 en pantallas menores) con referencia, nombre, precio, existencias, estado y las acciones disponibles (ajustar stock, editar, activar/desactivar).<br>3. El actor (opcional) escribe parte del nombre o la referencia para buscar (RF-10).<br>4. El sistema filtra las tarjetas y muestra las coincidentes.<br>5. El actor revisa la información; al salir, el sistema no cambia nada.</td>
 </tr>
 <tr>
 <td><strong>Flujos alternativos</strong></td>
@@ -822,7 +822,7 @@ hr { border: none; border-top: 1px solid #bbb; margin: 14pt 0; }
 </tr>
 <tr>
 <td><strong>Postcondiciones (éxito)</strong></td>
-<td>El actor ve referencia, nombre, precio y existencias actualizados; no se modifica ningún dato</td>
+<td>El actor ve en las tarjetas referencia, nombre, precio y existencias actualizados; no se modifica ningún dato</td>
 </tr>
 <tr>
 <td><strong>Postcondiciones (fallo)</strong></td>

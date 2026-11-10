@@ -143,7 +143,7 @@ La guía exige **distinguir los hechos de las hipótesis**. Los hechos son datos
 
 | Código | Requerimiento | Prioridad MoSCoW | Criterio de aceptación |
 |---|---|---|---|
-| RF-01 | Consultar productos, precios y existencias | **Must** | Desde el listado se ven referencia/nombre, precio y existencias de cada producto; la consulta funciona tras cerrar y reabrir la aplicación |
+| RF-01 | Consultar productos, precios y existencias | **Must** | El catálogo se presenta en **tarjetas (3 por fila en desktop, responsive a 2 y 1)** con referencia/nombre, precio, existencias, estado y acciones de cada producto; la consulta funciona tras cerrar y reabrir la aplicación |
 | RF-02 | Registrar o editar productos | **Must** | Se puede crear un producto y modificar su precio o existencias; el cambio persiste y se refleja en el listado sin recargar la base |
 | RF-03 | Registrar pedidos con productos y cantidades | **Must** | Un pedido admite varias líneas (producto + cantidad > 0), se guarda con su detalle consultable y, si el inventario alcanza, queda **confirmado automáticamente** en el mismo flujo |
 | RF-04 | Validar existencias y bloquear la confirmación inválida | **Must** | Si la cantidad supera las existencias, la confirmación se impide **y se muestra el motivo**; las existencias no cambian |
@@ -272,9 +272,9 @@ El diagrama general (Figura 3) contiene **nueve casos de uso y todos se detallan
 | **Actores secundarios** | Encargada de bodega, Gerente / Auxiliar administrativo |
 | **Disparador** | Cualquier actor necesita conocer precios o existencias antes de vender, preparar un pedido o revisar inventario |
 | **Precondiciones** | El catálogo contiene al menos un producto activo |
-| **Flujo principal** | 1. El actor abre la pantalla de catálogo.<br>2. El sistema lista los productos con referencia, nombre, precio y existencias.<br>3. El actor (opcional) escribe parte del nombre o la referencia para buscar (RF-10).<br>4. El sistema filtra la lista y muestra los coincidentes.<br>5. El actor revisa la información; al salir, el sistema no cambia nada. |
+| **Flujo principal** | 1. El actor abre la pantalla de catálogo.<br>2. El sistema presenta los productos en **tarjetas de 3 por fila** (desktop; 2 y 1 en pantallas menores) con referencia, nombre, precio, existencias, estado y las acciones disponibles (ajustar stock, editar, activar/desactivar).<br>3. El actor (opcional) escribe parte del nombre o la referencia para buscar (RF-10).<br>4. El sistema filtra las tarjetas y muestra las coincidentes.<br>5. El actor revisa la información; al salir, el sistema no cambia nada. |
 | **Flujos alternativos** | **A1 — Catálogo vacío:** si no hay productos, el sistema muestra «No hay productos registrados en el sistema.» y la pantalla ofrece el botón «Nuevo Producto» (CU-02).<br>**A2 — Sin coincidencias en la búsqueda:** el sistema muestra «No hay coincidencias para la búsqueda.» y ofrece un botón para limpiar la búsqueda.<br>**A3 — Error de carga:** el sistema muestra el error y un botón de reintento; no presenta datos incompletos como si fueran válidos. |
-| **Postcondiciones (éxito)** | El actor ve referencia, nombre, precio y existencias actualizados; no se modifica ningún dato |
+| **Postcondiciones (éxito)** | El actor ve en las tarjetas referencia, nombre, precio y existencias actualizados; no se modifica ningún dato |
 | **Postcondiciones (fallo)** | Se muestra un mensaje de error de carga; la información permanece intacta |
 
 #### CU-02. Registrar o editar un producto
