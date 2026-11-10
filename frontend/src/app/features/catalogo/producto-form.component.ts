@@ -94,8 +94,8 @@ import { mapError } from '../../core/utils/errores';
               <input
                 id="precio"
                 type="number"
-                min="0"
-                step="50"
+                min="0.01"
+                step="0.01"
                 formControlName="precio"
                 placeholder="0"
                 class="campo-control font-mono"
@@ -103,7 +103,7 @@ import { mapError } from '../../core/utils/errores';
               />
               <span class="campo-ayuda">Vista previa: {{ formatearPreview(formulario.controls.precio.value) }}</span>
               @if (campoInvalido('precio')) {
-                <span class="error-msg">El precio debe ser un número igual o mayor a 0</span>
+                <span class="error-msg">El precio debe ser un número mayor a 0</span>
               }
             </div>
 
@@ -415,7 +415,7 @@ export class ProductoFormComponent implements OnInit {
     }),
     precio: new FormControl<number>(0, {
       nonNullable: true,
-      validators: [Validators.required, Validators.min(0)]
+      validators: [Validators.required, Validators.min(0.01)]
     }),
     existencias: new FormControl<number>(0, {
       nonNullable: true,
