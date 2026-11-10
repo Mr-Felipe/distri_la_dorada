@@ -861,7 +861,7 @@ hr { border: none; border-top: 1px solid #bbb; margin: 14pt 0; }
 </tr>
 <tr>
 <td><strong>Flujo principal</strong></td>
-<td>1. El actor abre el catálogo y pulsa «Nuevo producto» o selecciona un producto existente.<br>2. Ingresa o corrige: referencia (única), nombre, precio (&gt; 0) y existencias (≥ 0).<br>3. El sistema valida formato, unicidad de la referencia y restricciones numéricas.<br>4. El sistema guarda el cambio y lo persiste en el servidor.<br>5. El catálogo se refresca y muestra el dato nuevo; si era una edición, los pedidos en curso conservan el precio congelado de sus líneas.</td>
+<td>1. El actor abre el catálogo y pulsa «Nuevo producto» o selecciona un producto existente.<br>2. Ingresa o corrige: referencia (única), nombre, precio (&gt; 0), existencias (≥ 0) y el indicador «Producto activo para venta» (si está desactivado, no se podrá agregar a nuevos pedidos).<br>3. El sistema valida formato, unicidad de la referencia y restricciones numéricas.<br>4. El sistema guarda el cambio y lo persiste en el servidor.<br>5. El catálogo se refresca y muestra el dato nuevo; si era una edición, los pedidos en curso conservan el precio congelado de sus líneas.</td>
 </tr>
 <tr>
 <td><strong>Flujos alternativos</strong></td>
@@ -912,7 +912,7 @@ hr { border: none; border-top: 1px solid #bbb; margin: 14pt 0; }
 </tr>
 <tr>
 <td><strong>Flujos alternativos</strong></td>
-<td><strong>A1 — Cantidad inválida:</strong> el sistema rechaza la línea con cantidad &lt; 1, muestra «La cantidad debe ser al menos 1», deshabilita el guardado y no la guarda (cantidades ≤ 0 rechazadas).<br><strong>A2 — Producto inexistente o inactivo:</strong> el desplegable solo ofrece productos activos; si el producto ya no existe o está inactivo, el servidor rechaza el registro con «Uno o más productos seleccionados no existen o están inactivos.» (el catálogo sigue en CU-01).<br><strong>A3 — Pedido sin líneas:</strong> el sistema impide guardar un pedido vacío (no permite quitar la última línea, el botón queda deshabilitado y el servidor responde <code>PEDIDO_VACIO</code>).<br><strong>A4 — Inventario insuficiente:</strong> el pedido se registra <code>pendiente</code> con el motivo (CU-04, flujo alternativo A1); el vendedor acuerda el cambio con el cliente, ajusta las líneas del pedido pendiente (CU-09) y reintenta la confirmación, o cancela el pedido y registra uno corregido (CU-08).<br><strong>A5 — Error de persistencia:</strong> el sistema informa el error; no queda un pedido a medias (todo o nada).</td>
+<td><strong>A1 — Cantidad inválida:</strong> el sistema rechaza la línea con cantidad &lt; 1, muestra «La cantidad debe ser al menos 1», deshabilita el guardado y no la guarda (cantidades ≤ 0 rechazadas).<br><strong>A2 — Producto inexistente o inactivo:</strong> el desplegable solo ofrece productos activos; si el producto ya no existe o está inactivo, el servidor rechaza el registro con «Uno o más productos seleccionados no existen o están inactivos.» (el catálogo sigue en CU-01).<br><strong>A3 — Pedido sin líneas:</strong> el sistema impide guardar un pedido vacío (con una sola línea no se ofrece el botón de quitar, el guardado queda deshabilitado y el servidor responde <code>PEDIDO_VACIO</code>).<br><strong>A4 — Inventario insuficiente:</strong> el pedido se registra <code>pendiente</code> con el motivo (CU-04, flujo alternativo A1); el vendedor acuerda el cambio con el cliente, ajusta las líneas del pedido pendiente (CU-09) y reintenta la confirmación, o cancela el pedido y registra uno corregido (CU-08).<br><strong>A5 — Error de persistencia:</strong> el sistema informa el error; no queda un pedido a medias (todo o nada).</td>
 </tr>
 <tr>
 <td><strong>Postcondiciones (éxito)</strong></td>
@@ -951,7 +951,7 @@ hr { border: none; border-top: 1px solid #bbb; margin: 14pt 0; }
 </tr>
 <tr>
 <td><strong>Disparador</strong></td>
-<td><strong>Automático:</strong> el sistema ejecuta la validación al registrar el pedido (CU-04, incluido en CU-03). <strong>Manual:</strong> el vendedor pulsa «Confirmar» sobre un pedido que quedó <code>pendiente</code> (por ejemplo, tras corregir un faltante)</td>
+<td><strong>Automático:</strong> el sistema ejecuta la validación al registrar el pedido (CU-04, incluido en CU-03). <strong>Manual:</strong> el vendedor pulsa «Confirmar Pedido» sobre un pedido que quedó <code>pendiente</code> (por ejemplo, tras corregir un faltante)</td>
 </tr>
 <tr>
 <td><strong>Precondiciones</strong></td>
@@ -959,7 +959,7 @@ hr { border: none; border-top: 1px solid #bbb; margin: 14pt 0; }
 </tr>
 <tr>
 <td><strong>Flujo principal</strong></td>
-<td>1. Al registrarse el pedido (o al pulsar «Confirmar»), el servidor vuelve a leer las existencias actuales (no confía en lo que cargó la pantalla) y compara contra la suma de cantidades pedidas por producto.<br>2. Si todo el inventario alcanza, el servidor descuenta las existencias y cambia el estado a <code>confirmado</code> <strong>en una sola operación</strong> (descuento único; la confirmación ocurre sola al registrarse el pedido).<br>3. El sistema muestra el pedido confirmado con su fecha y estado.<br>4. El pedido aparece automáticamente en la lista de bodega (todos ven el mismo registro): <strong>bodega lo despacha sin esperar ninguna confirmación adicional</strong>.</td>
+<td>1. Al registrarse el pedido (o al pulsar «Confirmar Pedido»), el servidor vuelve a leer las existencias actuales (no confía en lo que cargó la pantalla) y compara contra la suma de cantidades pedidas por producto.<br>2. Si todo el inventario alcanza, el servidor descuenta las existencias y cambia el estado a <code>confirmado</code> <strong>en una sola operación</strong> (descuento único; la confirmación ocurre sola al registrarse el pedido).<br>3. El sistema muestra el pedido confirmado con su fecha y estado.<br>4. El pedido aparece automáticamente en la lista de bodega (todos ven el mismo registro): <strong>bodega lo despacha sin esperar ninguna confirmación adicional</strong>.</td>
 </tr>
 <tr>
 <td><strong>Flujos alternativos</strong></td>
@@ -1147,11 +1147,11 @@ hr { border: none; border-top: 1px solid #bbb; margin: 14pt 0; }
 </tr>
 <tr>
 <td><strong>Flujo principal</strong></td>
-<td>1. El actor abre el pedido y pulsa «Cancelar».<br>2. El sistema pide confirmación y un motivo breve.<br>3. El sistema valida la transición hacia <code>rechazado</code> (estados y transiciones coherentes).<br>4. Si el pedido estaba <code>confirmado</code>, el sistema repone en la misma operación las existencias que descontó (reversión explícita, una sola vez).<br>5. El sistema registra el estado <code>rechazado</code>, el motivo y la fecha; el pedido sale de la cola de bodega y queda visible con su motivo en la lista de pedidos.</td>
+<td>1. El actor abre el pedido y pulsa «Cancelar Pedido».<br>2. El sistema pide confirmación y un motivo breve.<br>3. El sistema valida la transición hacia <code>rechazado</code> (estados y transiciones coherentes).<br>4. Si el pedido estaba <code>confirmado</code>, el sistema repone en la misma operación las existencias que descontó (reversión explícita, una sola vez).<br>5. El sistema registra el estado <code>rechazado</code>, el motivo y la fecha; el pedido sale de la cola de bodega y queda visible con su motivo en la lista de pedidos.</td>
 </tr>
 <tr>
 <td><strong>Flujos alternativos</strong></td>
-<td><strong>A1 — Pedido ya despachado:</strong> no se ofrece el botón Cancelar (solo aparece para pedidos <code>pendiente</code> o <code>confirmado</code>); la devolución queda fuera del alcance del sistema.<br><strong>A2 — Pedido ya rechazado:</strong> el detalle muestra el banner con el «Motivo de rechazo / cancelación» y no se ofrece el botón Cancelar (evita acciones repetidas).<br><strong>A3 — Fallo al reponer existencias:</strong> si la reversión falla, el sistema no cambia el estado y reporta el error, para no quedar un pedido cancelado con inventario descontado (RNF-04: integridad del inventario).</td>
+<td><strong>A1 — Pedido ya despachado:</strong> no se ofrece el botón «Cancelar Pedido» (solo aparece para pedidos <code>pendiente</code> o <code>confirmado</code>); la devolución queda fuera del alcance del sistema.<br><strong>A2 — Pedido ya rechazado:</strong> el detalle muestra el banner con el «Motivo de rechazo / cancelación» y no se ofrece el botón «Cancelar Pedido» (evita acciones repetidas).<br><strong>A3 — Fallo al reponer existencias:</strong> si la reversión falla, el sistema no cambia el estado y reporta el error, para no quedar un pedido cancelado con inventario descontado (RNF-04: integridad del inventario).</td>
 </tr>
 <tr>
 <td><strong>Postcondiciones (éxito)</strong></td>
@@ -1663,7 +1663,7 @@ hr { border: none; border-top: 1px solid #bbb; margin: 14pt 0; }
 <td>1. Abrir la app. 2. Registrar el pedido de 5 detergentes (el sistema intenta la confirmación automática). 3. Leer el estado final y consultar el catálogo y el detalle. 4. Intentar confirmar de nuevo (reintento)</td>
 <td>El pedido queda <code>confirmado</code>; las existencias de detergente pasan de <strong>60 a 55</strong> y se descontaron <strong>una sola vez</strong></td>
 <td>✅ Ejecutado (09/11/2026): <strong>por API</strong>, <code>PED-2026-0005</code> quedó <code>confirmado</code>, existencias <strong>60 → 55</strong> y la segunda confirmación fue rechazada con <code>TRANSICION_INVALIDA</code> (sin doble descuento); <strong>en navegador sin sesión con confirmación automática</strong>, <code>PED-2026-0009</code> nació directamente <code>confirmado</code> al registrarlo (CER-001 <strong>32 → 31</strong>, un solo descuento) y quedó visible para despacho</td>
-<td>API y verificación end-to-end en navegador (Chrome DevTools) sobre el proyecto desplegado; captura en <code>docs/evidencias/t01-existencias-detergente-55.png</code> (catálogo con DET-001 en <strong>55 uds</strong> tras el pedido de 5)</td>
+<td>API y verificación end-to-end en navegador (Chrome DevTools) sobre el proyecto desplegado; captura en <code>docs/evidencias/t01-catalogo-detergente.png</code> (catálogo en tarjetas con búsqueda de detergente: DET-001 en <strong>15 uds</strong> al momento de la captura, tras la ejecución de las pruebas)</td>
 </tr>
 <tr>
 <td><strong>T-02</strong></td>
@@ -1680,12 +1680,23 @@ hr { border: none; border-top: 1px solid #bbb; margin: 14pt 0; }
 <td>Un pedido ya registrado; navegador del teléfono o emulador</td>
 <td>1. Registrar un pedido desde el computador. 2. Abrir la app desde el teléfono/emulador y buscar el pedido. 3. Cerrar y reabrir la aplicación. 4. Volver a consultar el pedido y el catálogo</td>
 <td>El pedido aparece desde el móvil con <strong>el mismo estado y detalle</strong>, y <strong>persiste</strong> tras cerrar y reabrir</td>
-<td>✅ Ejecutado (09/11/2026): en emulador móvil (360 px, táctil) el pedido <code>PED-2026-0009</code> se mostró con el <strong>mismo estado y detalle</strong> que en escritorio (confirmado, cliente, fechas, línea y total); tras <strong>cerrar y reabrir</strong> (recarga de la aplicación) el detalle, la lista de pedidos y el catálogo volvieron a cargar con los mismos datos (persistencia); sin desbordes horizontales (ancho 360 px) ni errores en consola</td>
+<td>✅ Ejecutado (09/11/2026): en emulador móvil (360 px, táctil) el pedido <code>PED-2026-0018</code> se mostró con el <strong>mismo estado y detalle</strong> que en escritorio (confirmado, cliente, fechas, líneas y total); tras <strong>cerrar y reabrir</strong> (recarga de la aplicación) el detalle, la lista de pedidos y el catálogo volvieron a cargar con los mismos datos (persistencia); sin desbordes horizontales (ancho 360 px) ni errores en consola</td>
 <td>Capturas en <code>docs/evidencias/</code>: <code>t03-01-pedidos-movil.png</code> (lista), <code>t03-02-detalle-pedido-movil.png</code> (detalle), <code>t03-03-persistencia-tras-reabrir.png</code> (detalle tras reabrir) y <code>t03-04-catalogo-movil.png</code> (catálogo); verificación end-to-end en navegador móvil emulado (Chrome DevTools)</td>
 </tr>
 </tbody>
 </table>
 <p><strong>Criterio de aprobación de la matriz:</strong> los tres resultados obtenidos coinciden con los esperados; cualquier desviación se documenta en el apartado 5.10 como limitación, sin crear un informe de pruebas adicional.</p>
+<h3>Evidencias en navegador</h3>
+<p>Capturas tomadas con Chrome DevTools durante la verificación end-to-end (09/11/2026), con la interfaz actual (catálogo en tarjetas).</p>
+<p><strong>T-01 — Catálogo con búsqueda de detergente (DET-001, 15 uds al momento de la captura):</strong></p>
+<p><img alt="T-01 catálogo con búsqueda de detergente" src="C:/Users/veran/OneDrive/Desktop/Semestre 6/Desarrollo sistemas empresariales/Proyecto_Final_Distribuidora_La_Dorada/docs/evidencias/t01-catalogo-detergente.png"></p>
+<p><strong>T-02 — Bloqueo de la confirmación por inventario insuficiente (<code>PED-2026-0010</code>):</strong></p>
+<p><img alt="T-02 mensaje de inventario insuficiente" src="C:/Users/veran/OneDrive/Desktop/Semestre 6/Desarrollo sistemas empresariales/Proyecto_Final_Distribuidora_La_Dorada/docs/evidencias/t02-mensaje-bloqueo.png"></p>
+<p><strong>T-03 — Consulta desde el móvil (360 px) y persistencia:</strong></p>
+<p><img alt="T-03 lista de pedidos en móvil" src="C:/Users/veran/OneDrive/Desktop/Semestre 6/Desarrollo sistemas empresariales/Proyecto_Final_Distribuidora_La_Dorada/docs/evidencias/t03-01-pedidos-movil.png"></p>
+<p><img alt="T-03 detalle del pedido en móvil" src="C:/Users/veran/OneDrive/Desktop/Semestre 6/Desarrollo sistemas empresariales/Proyecto_Final_Distribuidora_La_Dorada/docs/evidencias/t03-02-detalle-pedido-movil.png"></p>
+<p><img alt="T-03 detalle tras reabrir la aplicación" src="C:/Users/veran/OneDrive/Desktop/Semestre 6/Desarrollo sistemas empresariales/Proyecto_Final_Distribuidora_La_Dorada/docs/evidencias/t03-03-persistencia-tras-reabrir.png"></p>
+<p><img alt="T-03 catálogo en móvil" src="C:/Users/veran/OneDrive/Desktop/Semestre 6/Desarrollo sistemas empresariales/Proyecto_Final_Distribuidora_La_Dorada/docs/evidencias/t03-04-catalogo-movil.png"></p>
 <h2>5.9 Métricas de éxito</h2>
 <p>Tres indicadores para evaluar el sistema en uso. El sistema ya registra las marcas de tiempo necesarias para medirlos; la bitácora de auditoría prevista para los ajustes manuales quedó fuera de esta versión (5.10.2). Mientras no haya operación real, se mantienen como metas hipotéticas sobre la línea base didáctica.</p>
 <table>
