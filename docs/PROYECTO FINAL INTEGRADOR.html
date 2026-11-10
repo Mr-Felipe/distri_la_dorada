@@ -1297,7 +1297,7 @@ hr { border: none; border-top: 1px solid #bbb; margin: 14pt 0; }
 </tr>
 <tr>
 <td><strong>Flujo principal</strong></td>
-<td>1. Bodega abre la pantalla en la pestaña «Pedidos por Despachar (Confirmados)» (la pantalla ofrece además la pestaña de solo lectura «Sin Confirmar (Solo Lectura)» con los pedidos en cola comercial).<br>2. Selecciona un pedido y revisa su detalle (líneas, cantidades y cliente).<br>3. Marca «Despachar».<br>4. El sistema verifica que la transición <code>confirmado → despachado</code> esté permitida, cambia el estado y registra la fecha y hora (estados y transiciones coherentes).<br>5. El sistema muestra el pedido como <code>despachado</code> y lo retira de la lista de pendientes.<br>6. La misma información queda visible para ventas, administración y gerencia (escritorio y móvil consultan los mismos registros).</td>
+<td>1. Bodega abre la pantalla «Bodega y Despachos», que lista únicamente los pedidos <code>confirmado</code> listos para alistamiento (los pedidos <code>pendiente</code> <strong>no aparecen</strong>: los gestiona comercial, CU-04 y CU-09).<br>2. Selecciona un pedido y revisa su detalle (líneas, cantidades y cliente).<br>3. Marca «Despachar».<br>4. El sistema verifica que la transición <code>confirmado → despachado</code> esté permitida, cambia el estado y registra la fecha y hora (estados y transiciones coherentes).<br>5. El sistema muestra el pedido como <code>despachado</code> y lo retira de la lista de pendientes.<br>6. La misma información queda visible para ventas, administración y gerencia (escritorio y móvil consultan los mismos registros).</td>
 </tr>
 <tr>
 <td><strong>Flujos alternativos</strong></td>
@@ -1344,7 +1344,7 @@ hr { border: none; border-top: 1px solid #bbb; margin: 14pt 0; }
 </tr>
 <tr>
 <td><strong>Flujo principal</strong></td>
-<td>1. El actor abre la pantalla de resumen.<br>2. El sistema agrupa los pedidos por estado (<code>pendiente</code>, <code>confirmado</code>, <code>despachado</code>, <code>rechazado</code>) y suma sus totales.<br>3. El sistema presenta el conteo y el valor de cada estado.<br>4. El actor usa la cifra para consolidar los pagos del día o detectar atrasos.<br>5. Al cambiar el estado de un pedido (CU-04 o CU-06), el resumen se actualiza.</td>
+<td>1. El actor abre la pantalla de resumen.<br>2. El sistema agrupa los pedidos por estado (<code>pendiente</code>, <code>confirmado</code>, <code>despachado</code>, <code>rechazado</code>) y suma sus totales.<br>3. El sistema presenta el conteo y el valor de cada estado.<br>4. El actor usa la cifra para consolidar los pagos del día o detectar atrasos.<br>5. En la tarjeta de cada estado, «Ver lista» abre la lista de pedidos (CU-05) con el <strong>filtro de ese estado ya activo</strong>.<br>6. Al cambiar el estado de un pedido (CU-04 o CU-06), el resumen se actualiza.</td>
 </tr>
 <tr>
 <td><strong>Flujos alternativos</strong></td>

@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { PedidoService } from '../../core/services/pedido.service';
 import { EstadoPedido } from '../../core/models/enums';
 import { Pedido } from '../../core/models/pedido';
@@ -447,6 +447,7 @@ type FiltroEstadoTipo = 'todos' | EstadoPedido;
 })
 export class PedidosListaComponent implements OnInit {
   private readonly pedidoService = inject(PedidoService);
+  private readonly route = inject(ActivatedRoute);
 
   readonly pedidos = signal<Pedido[]>([]);
   readonly cargando = signal<boolean>(true);
@@ -482,6 +483,11 @@ export class PedidosListaComponent implements OnInit {
   });
 
   ngOnInit(): void {
+    // Filtro precargado desde el resumen («Ver lista» → /pedidos?estado=…)
+    const estadoUrl = this.route.snapshot.queryParamMap.get('estado');
+    if (estadoUrl && this.listaFiltros.some(f => f.id === estadoUrl)) {
+      this.estadoSeleccionado.set(estadoUrl as FiltroEstadoTipo);
+    }
     this.controlBusqueda.valueChanges.subscribe(v => this.terminoBusqueda.set(v ?? ''));
     this.cargarPedidos();
   }

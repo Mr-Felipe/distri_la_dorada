@@ -77,7 +77,7 @@ import { TablaResponsiva } from '../../shared/tabla-responsiva/tabla-responsiva'
 
             <div class="estado-card-footer">
               <span class="estado-desc">{{ meta.descripcion }}</span>
-              <a [routerLink]="['/pedidos']" class="link-ver-estado">
+              <a [routerLink]="['/pedidos']" [queryParams]="{ estado: item.estado }" class="link-ver-estado">
                 Ver lista
                 <span class="material-icons">arrow_forward</span>
               </a>

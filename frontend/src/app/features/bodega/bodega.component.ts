@@ -31,45 +31,14 @@ import { Modal } from '../../shared/modal/modal';
         </div>
       </div>
 
-      <!-- Selector de Pestañas: Confirmados (Por despachar) vs Pendientes (Solo Lectura) -->
-      <div class="tabs-bodega">
-        <button
-          type="button"
-          class="tab-btn"
-          [class.tab-activo]="pestanaActiva() === 'confirmado'"
-          (click)="cambiarPestana('confirmado')"
-        >
-          <span class="material-icons">inventory</span>
-          <span>Pedidos por Despachar (Confirmados)</span>
-          <span class="badge-contador">{{ conteoConfirmados() }}</span>
-        </button>
-
-        <button
-          type="button"
-          class="tab-btn"
-          [class.tab-activo]="pestanaActiva() === 'pendiente'"
-          (click)="cambiarPestana('pendiente')"
-        >
-          <span class="material-icons">pending_actions</span>
-          <span>Sin Confirmar (Solo Lectura)</span>
-        </button>
-      </div>
-
-      @if (pestanaActiva() === 'pendiente') {
-        <div class="aviso-lectura">
-          <span class="material-icons">info</span>
-          <span>Estos pedidos están pendientes de aprobación comercial. Bodega no puede despacharlos hasta que sean confirmados.</span>
-        </div>
-      }
-
-      <!-- Listado de Pedidos en Bodega -->
+      <!-- Listado de pedidos confirmados listos para despacho -->
       <app-tabla-responsiva
         [cargando]="cargando()"
         [error]="errorCarga()"
         [totalElementos]="pedidosVisibles().length"
         [mensajeCargando]="'Consultando pedidos para despacho en bodega...'"
-        [tituloVacio]="pestanaActiva() === 'confirmado' ? 'No hay pedidos pendientes de despacho' : 'No hay pedidos pendientes por confirmar'"
-        [mensajeVacio]="pestanaActiva() === 'confirmado' ? 'Todos los pedidos confirmados han sido despachados de bodega.' : 'No existen pedidos en cola comercial.'"
+        [tituloVacio]="'No hay pedidos pendientes de despacho'"
+        [mensajeVacio]="'Todos los pedidos confirmados han sido despachados de bodega.'"
         [iconoVacio]="'local_shipping'"
         (reintentar)="cargarPedidos()"
       >
@@ -88,18 +57,16 @@ import { Modal } from '../../shared/modal/modal';
                     {{ formatearFecha(ped.confirmado_en || ped.creado_en) }}
                   </span>
 
-                  @if (pestanaActiva() === 'confirmado') {
-                    <app-boton-cargando
-                      [variante]="'exito'"
-                      [tamano]="'sm'"
-                      [cargando]="despachandoId() === ped.id"
-                      [icono]="'local_shipping'"
-                      [textoCargando]="'Despachando...'"
-                      (accionar)="abrirConfirmarDespacho(ped)"
-                    >
-                      Despachar
-                    </app-boton-cargando>
-                  }
+                  <app-boton-cargando
+                    [variante]="'exito'"
+                    [tamano]="'sm'"
+                    [cargando]="despachandoId() === ped.id"
+                    [icono]="'local_shipping'"
+                    [textoCargando]="'Despachando...'"
+                    (accionar)="abrirConfirmarDespacho(ped)"
+                  >
+                    Despachar
+                  </app-boton-cargando>
 
                   <a [routerLink]="['/pedidos', ped.id]" class="btn-ver-orden" title="Ver pedido completo">
                     <span class="material-icons">open_in_new</span>
@@ -262,67 +229,6 @@ import { Modal } from '../../shared/modal/modal';
     }
     .btn-refrescar:hover {
       background: #e2e8f0;
-    }
-
-    .tabs-bodega {
-      display: flex;
-      gap: 0.5rem;
-      margin-bottom: 1.25rem;
-      border-bottom: 2px solid #e2e8f0;
-      padding-bottom: 0.5rem;
-      flex-wrap: wrap;
-    }
-
-    .tab-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-      background: transparent;
-      border: none;
-      color: #64748b;
-      padding: 0.65rem 1rem;
-      font-size: 0.875rem;
-      font-weight: 700;
-      border-radius: 0.5rem;
-      cursor: pointer;
-      transition: all 0.15s ease;
-      font-family: inherit;
-    }
-    .tab-btn:hover {
-      background: #f1f5f9;
-      color: #0f2744;
-    }
-
-    .tab-activo {
-      background: #0f2744 !important;
-      color: #ffffff !important;
-    }
-
-    .badge-contador {
-      background: #b89326;
-      color: #ffffff;
-      padding: 0.1rem 0.45rem;
-      border-radius: 9999px;
-      font-size: 0.75rem;
-    }
-    .tab-activo .badge-contador {
-      background: #d4af37;
-      color: #0a192f;
-      font-weight: 800;
-    }
-
-    .aviso-lectura {
-      background: #f8fafc;
-      border: 1px solid #e2e8f0;
-      border-left: 4px solid #64748b;
-      border-radius: 0.5rem;
-      padding: 0.75rem 1rem;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      font-size: 0.875rem;
-      color: #475569;
-      margin-bottom: 1.25rem;
     }
 
     .lista-despacho {
@@ -508,7 +414,6 @@ export class BodegaComponent implements OnInit {
   private readonly pedidoService = inject(PedidoService);
   private readonly toast = inject(ToastService);
 
-  readonly pestanaActiva = signal<'confirmado' | 'pendiente'>('confirmado');
   readonly pedidos = signal<Pedido[]>([]);
   readonly cargando = signal<boolean>(true);
   readonly errorCarga = signal<string | null>(null);
@@ -522,12 +427,9 @@ export class BodegaComponent implements OnInit {
   readonly guardandoDespacho = signal<boolean>(false);
   readonly despachandoId = signal<string | null>(null);
 
-  get conteoConfirmados(): () => number {
-    return () => this.pedidos().filter(p => p.estado === 'confirmado').length;
-  }
-
   get pedidosVisibles(): () => Pedido[] {
-    return () => this.pedidos().filter(p => p.estado === this.pestanaActiva());
+    // Bodega solo despacha pedidos confirmados (la cola comercial no es su competencia)
+    return () => this.pedidos().filter(p => p.estado === 'confirmado');
   }
 
   ngOnInit(): void {
@@ -538,12 +440,12 @@ export class BodegaComponent implements OnInit {
     this.cargando.set(true);
     this.errorCarga.set(null);
     try {
-      // Traer todos los pedidos recientes para tener confirmados y pendientes
       const lista = await this.pedidoService.listar();
-      
-      // Enriquecer con sus ítems
+
+      // Solo se enriquecen los confirmados: son los únicos que bodega despacha
+      const confirmados = lista.filter(p => p.estado === 'confirmado').slice(0, 30);
       const enriquecidos = await Promise.all(
-        lista.slice(0, 30).map(async (ped) => {
+        confirmados.map(async (ped) => {
           try {
             return await this.pedidoService.obtenerPorId(ped.id);
           } catch {
@@ -553,9 +455,9 @@ export class BodegaComponent implements OnInit {
       );
 
       this.pedidos.set(enriquecidos);
-      // Por defecto expandir los primeros confirmados
+      // Por defecto expandir los primeros
       const initialSet = new Set<string>();
-      enriquecidos.filter(p => p.estado === 'confirmado').slice(0, 3).forEach(p => initialSet.add(p.id));
+      enriquecidos.slice(0, 3).forEach(p => initialSet.add(p.id));
       this.expandidos.set(initialSet);
     } catch (err: unknown) {
       const appErr = mapError(err);
@@ -563,10 +465,6 @@ export class BodegaComponent implements OnInit {
     } finally {
       this.cargando.set(false);
     }
-  }
-
-  cambiarPestana(tab: 'confirmado' | 'pendiente'): void {
-    this.pestanaActiva.set(tab);
   }
 
   formatearNumero(num: string | number): string {
