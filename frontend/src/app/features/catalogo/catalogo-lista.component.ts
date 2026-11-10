@@ -604,7 +604,11 @@ import { Modal } from '../../shared/modal/modal';
       }
 
       .tarjeta-acciones {
-        flex-wrap: wrap;
+        flex-direction: column;
+      }
+
+      .btn-accion-tarjeta {
+        width: 100%;
       }
     }
 
